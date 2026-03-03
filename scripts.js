@@ -150,6 +150,8 @@ const FALLBACK_GAS_URL = "";
     let mobileFocusAssistSuspendUntil = 0;
     let lastTouchMoveAt = 0;
     let lastScrollAt = 0;
+    let geolocationCache = null;
+    let geolocationPending = null;
     const POLICY_PAGE_INDEX = pages.indexOf(policyPage);
     const WELCOME_PAGE_INDEX = pages.indexOf(welcomePage);
     const NOT_ELIGIBLE_PAGE_INDEX = pages.indexOf(notEligiblePage);
@@ -176,6 +178,8 @@ const FALLBACK_GAS_URL = "";
     const MOBILE_FOCUS_ASSIST_SUSPEND_MS = 260;
     const MOBILE_FOCUS_ASSIST_SCROLL_COOLDOWN_MS = 140;
     const PDF_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+    const GEOLOCATION_TIMEOUT_MS = 2600;
+    const GEOLOCATION_MAX_AGE_MS = 5 * 60 * 1000;
 
     const THAI_PROVINCE_DATA_URL = "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api/v1/province.json";
     const THAI_AMPHURE_DATA_URL = "https://raw.githubusercontent.com/kongvut/thai-province-data/master/api/v1/amphure.json";
@@ -1285,7 +1289,7 @@ const FALLBACK_GAS_URL = "";
       if (!applicantName) {
         if (showError) {
           setPdfUploadStatus(
-            "Please enter applicant name before uploading.\n(ဖိုင်မတင်မည့်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
+            "Please enter applicant name before uploading.\n(ဖိုင်တင်မည့်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
             true
           );
         }
@@ -1295,7 +1299,7 @@ const FALLBACK_GAS_URL = "";
       if (!file) {
         if (showError) {
           setPdfUploadStatus(
-            "Please choose a completed PDF file to upload.\n(ဖြည့်ထားသော PDF ဖိုင်ကိုရွေးချယ်၍ တင်သွင်းပါ။)",
+            "Please choose a completed PDF file to upload.\n(ဖြည့်ပြီး PDF ဖိုင်ကို ရွေးချယ်ပါ။)",
             true
           );
         }
@@ -1422,7 +1426,7 @@ const FALLBACK_GAS_URL = "";
       if (pdfUploadSubmitBtn) {
         pdfUploadSubmitBtn.textContent = "Uploading... / (တင်နေသည်...)";
       }
-      setPdfUploadStatus("Uploading completed PDF file... / (အချက်အလက်ဖြည့်သွင်းထားသော PDF ဖိုင်ကို တင်နေပါသည်...)", false);
+      setPdfUploadStatus("Uploading completed PDF file... / (ဖြည့်ပြီး PDF ဖိုင်ကို တင်နေပါသည်...)", false);
 
       try {
         const fileBase64 = await readFileAsBase64(selectedFile);
@@ -1449,7 +1453,7 @@ const FALLBACK_GAS_URL = "";
 
         const savedUrl = getSafeHttpUrl(response.result && response.result.pdfFileUrl);
         const successHtml =
-          "Your completed PDF was uploaded successfully.<br>(အချက်အလက်ဖြည့်သွင်းထားသော PDF ဖိုင်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။)" +
+          "Your completed PDF was uploaded successfully.<br>(ဖြည့်ပြီး PDF ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။)" +
           (savedUrl
             ? '<span class="status-contact-links"><a class="status-contact-link" href="' +
               savedUrl +
@@ -2012,15 +2016,15 @@ const FALLBACK_GAS_URL = "";
         ageTotalMonths > maxAgeMonths
       ) {
         reasons.push({
-          en: "Age must be between 18 years and 25 years old.",
-          my: "(အသက်သည် ၁၈ နှစ် မှ ၂၅ နှစ်အတွင်း ဖြစ်ရမည်။)"
+          en: "Age must be between 17 years 5 months and 25 years old.",
+          my: "(အသက်သည် ၁၇ နှစ် ၅ လမှ ၂၅ နှစ်အတွင်း ဖြစ်ရမည်။)"
         });
       }
 
       if (attendanceValue === "no") {
         reasons.push({
           en: "Applicant must be able to attend in person.",
-          my: "(သင်တန်းကို လူကိုယ်တိုင် တက်ရောက်နိုင်ရမည်။)"
+          my: "(သင်တန်းကို လူကိုယ်တိုင် လာရောက်တက်ရောက်နိုင်ရမည်။)"
         });
       }
 
@@ -2073,7 +2077,7 @@ const FALLBACK_GAS_URL = "";
         eligibilityResultTitle.textContent = "Not Eligible\n(လက်ရှိတွင် လျှောက်ထားရန် မကိုက်ညီသေးပါ)";
         eligibilityResultCopy.textContent =
           "Thank you for your interest in our program. Based on your responses, you are currently not eligible.\n" +
-          "(ကျွန်ုပ်တို့၏ သင်တန်းကို စိတ်ဝင်စားသည့်အတွက် ကျေးဇူးတင်ပါသည်။ သင်ဖြည့်သွင်းထားသော အချက်အလက်များအရ လက်ရှိအချိန်တွင် ဝင်ခွင့်မရပါ။)\n\n" +
+          "(ကျွန်ုပ်တို့၏ သင်တန်းကို စိတ်ဝင်စားသည့်အတွက် ကျေးဇူးတင်ပါသည်။ သင်ဖြည့်သွင်းထားသော အချက်အလက်များအရ လက်ရှိအချိန်တွင် ဝင်ခွင့်မပြည့်မီပါ။)\n\n" +
           reasonLines;
       }
     }
@@ -2473,6 +2477,182 @@ const FALLBACK_GAS_URL = "";
       // leave policy routing to the explicit policy choice handlers
     }
 
+    function padTwoDigits(value) {
+      const num = Number(value);
+      if (!isFinite(num)) return "00";
+      return String(Math.trunc(num)).padStart(2, "0");
+    }
+
+    function formatLocalTimestamp(dateValue) {
+      const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+      if (isNaN(date.getTime())) return "";
+      return (
+        String(date.getFullYear()) +
+        "-" +
+        padTwoDigits(date.getMonth() + 1) +
+        "-" +
+        padTwoDigits(date.getDate()) +
+        " " +
+        padTwoDigits(date.getHours()) +
+        ":" +
+        padTwoDigits(date.getMinutes()) +
+        ":" +
+        padTwoDigits(date.getSeconds())
+      );
+    }
+
+    function formatUtcOffsetLabel(offsetMinutes) {
+      const minutes = Number(offsetMinutes);
+      if (!isFinite(minutes)) return "";
+      const sign = minutes >= 0 ? "+" : "-";
+      const abs = Math.abs(minutes);
+      const hours = Math.floor(abs / 60);
+      const mins = abs % 60;
+      return "UTC" + sign + padTwoDigits(hours) + ":" + padTwoDigits(mins);
+    }
+
+    function roundNumeric(value, decimals) {
+      const num = Number(value);
+      if (!isFinite(num)) return "";
+      return num.toFixed(decimals);
+    }
+
+    function mapGeolocationErrorCode(errorCode) {
+      switch (Number(errorCode)) {
+        case 1:
+          return "permission_denied";
+        case 2:
+          return "position_unavailable";
+        case 3:
+          return "timeout";
+        default:
+          return "error";
+      }
+    }
+
+    function getGeolocationSnapshot() {
+      if (
+        geolocationCache &&
+        geolocationCache.value &&
+        Date.now() - geolocationCache.cachedAt <= GEOLOCATION_MAX_AGE_MS
+      ) {
+        return Promise.resolve(geolocationCache.value);
+      }
+      if (geolocationPending) {
+        return geolocationPending;
+      }
+      if (
+        typeof navigator === "undefined" ||
+        !navigator.geolocation ||
+        typeof navigator.geolocation.getCurrentPosition !== "function"
+      ) {
+        return Promise.resolve({ gpsStatus: "unsupported" });
+      }
+
+      geolocationPending = new Promise(function (resolve) {
+        let settled = false;
+        let timeoutId = null;
+
+        function finalize(payload) {
+          if (settled) return;
+          settled = true;
+          if (timeoutId != null && typeof window !== "undefined" && typeof window.clearTimeout === "function") {
+            window.clearTimeout(timeoutId);
+          }
+          const value = payload && typeof payload === "object" ? payload : { gpsStatus: "error" };
+          geolocationCache = {
+            cachedAt: Date.now(),
+            value: value
+          };
+          geolocationPending = null;
+          resolve(value);
+        }
+
+        try {
+          timeoutId = typeof window !== "undefined" && typeof window.setTimeout === "function"
+            ? window.setTimeout(function () {
+              finalize({ gpsStatus: "timeout" });
+            }, GEOLOCATION_TIMEOUT_MS + 300)
+            : null;
+
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const coords = position && position.coords ? position.coords : {};
+              const timestamp = position && typeof position.timestamp === "number"
+                ? position.timestamp
+                : Date.now();
+              finalize({
+                gpsStatus: "captured",
+                gpsLatitude: roundNumeric(coords.latitude, 6),
+                gpsLongitude: roundNumeric(coords.longitude, 6),
+                gpsAccuracyMeters: roundNumeric(coords.accuracy, 1),
+                gpsCapturedAt: new Date(timestamp).toISOString()
+              });
+            },
+            function (error) {
+              const code = error && typeof error.code === "number" ? error.code : 0;
+              finalize({
+                gpsStatus: mapGeolocationErrorCode(code),
+                gpsErrorCode: code ? String(code) : "",
+                gpsErrorMessage: error && error.message ? String(error.message) : ""
+              });
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: GEOLOCATION_TIMEOUT_MS,
+              maximumAge: GEOLOCATION_MAX_AGE_MS
+            }
+          );
+        } catch (error) {
+          finalize({
+            gpsStatus: "unavailable",
+            gpsErrorMessage: String(error && error.message ? error.message : error)
+          });
+        }
+      });
+
+      return geolocationPending;
+    }
+
+    async function attachRealtimeDeviceContext(payload) {
+      const data = payload && typeof payload === "object" ? payload : {};
+      const now = new Date();
+      const offsetMinutes = -now.getTimezoneOffset();
+      let timezone = "";
+
+      try {
+        if (
+          typeof Intl !== "undefined" &&
+          Intl.DateTimeFormat &&
+          Intl.DateTimeFormat().resolvedOptions
+        ) {
+          timezone = String(Intl.DateTimeFormat().resolvedOptions().timeZone || "").trim();
+        }
+      } catch (_) {
+        timezone = "";
+      }
+
+      data.clientCapturedAt = now.toISOString();
+      data.clientLocalTime = formatLocalTimestamp(now);
+      data.clientTimeZone = timezone;
+      data.clientUtcOffset = formatUtcOffsetLabel(offsetMinutes);
+      data.clientUtcOffsetMinutes = String(offsetMinutes);
+      if (!data.submittedAt) {
+        data.submittedAt = data.clientCapturedAt;
+      }
+
+      const geo = await getGeolocationSnapshot();
+      if (geo && typeof geo === "object") {
+        Object.keys(geo).forEach(function (key) {
+          const value = geo[key];
+          if (value == null) return;
+          data[key] = value;
+        });
+      }
+
+      return data;
+    }
+
     function collectFormData() {
       const data = {};
       new FormData(form).forEach(function (value, key) {
@@ -2591,8 +2771,15 @@ const FALLBACK_GAS_URL = "";
     }
 
     async function submitPayload(payload) {
+      let payloadWithContext = payload && typeof payload === "object" ? payload : {};
+      try {
+        payloadWithContext = await attachRealtimeDeviceContext(payloadWithContext);
+      } catch (error) {
+        console.warn("Realtime device context capture failed:", error);
+      }
+
       if (isAppsScriptRuntime()) {
-        return postToAppsScript(payload);
+        return postToAppsScript(payloadWithContext);
       }
       if (!GAS_URL) {
         return {
@@ -2600,7 +2787,7 @@ const FALLBACK_GAS_URL = "";
           error: "Submission service is not configured."
         };
       }
-      return postToGAS(payload);
+      return postToGAS(payloadWithContext);
     }
 
     async function trackNotEligibleSubmission(result) {
