@@ -1,0 +1,2151 @@
+﻿/* ==========================================================================
+   0) FONT LOADING
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@font-face {
+  font-family: "Myanmar Ethic";
+  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Ethic-api@main/Myanmar%20Ethnic%20v1.01.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+/* Load Myanmar3 directly from the same host to avoid external DNS dependency. */
+@font-face {
+  font-family: "Myanmar3";
+  src:
+    local("Myanmar3"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.woff") format("woff"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+1000-109F, U+A9E0-A9FF, U+AA60-AA7F;
+}
+
+@font-face {
+  font-family: "Myanmar3";
+  src:
+    local("Myanmar3"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.woff") format("woff"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+1000-109F, U+A9E0-A9FF, U+AA60-AA7F;
+}
+
+/* ==========================================================================
+   1) DESIGN TOKENS
+   ========================================================================== */
+:root {
+  --panel: #f7fbff;
+  --card-bg: #f4f8ff;
+  --card-bg-soft: #eef4ff;
+  --ink: #0f172a;
+  --muted: #4b5563;
+  --brand: #0f766e;
+  --brand-strong: #115e59;
+  --focus-blue: #1a73e8;
+  --bad: #b91c1c;
+  --my-title-line-height: 1.9;
+  --my-title-pad-top: 0.08em;
+  --my-title-pad-bottom: 0.12em;
+  --my-title-line-height-mobile: 2.02;
+  --my-title-pad-top-mobile: 0.1em;
+  --my-title-pad-bottom-mobile: 0.14em;
+  /* Body text default */
+  --font-latin: "Myanmar Ethic", "Inter", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Segoe UI", Arial, sans-serif;
+  /* Myanmar script fallback for generic .my text */
+  --font-myanmar: "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  /* Card text Burmese font */
+  --font-myanmar-card: "Tharlon", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
+  /* Title/headline font */
+  --font-title: "Tharlon", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
+}
+
+/* ==========================================================================
+   2) BASE + DESKTOP DEFAULT
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  word-wrap: break-word;
+}
+
+html {
+  font-size: clamp(15px, 1vw + 0.5rem, 18px);
+}
+
+html,
+body {
+  max-width: 100%;
+  /* Keep native lateral panning fluid when users pinch-zoom. */
+  overflow-x: visible;
+  touch-action: auto;
+}
+
+/* Keep mobile zoom readable by avoiding horizontal clipping and forcing wraps. */
+@media (max-width: 1024px), (pointer: coarse), (hover: none) {
+  .shell,
+  .panel,
+  .form-wrap,
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group,
+  .grid,
+  .grid > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
+
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-latin);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  line-height: 1.55;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 8% 8%, rgba(26, 115, 232, 0.08) 0%, transparent 42%),
+    linear-gradient(180deg, #f7f9fc 0%, #eff3f9 100%);
+  min-height: 100vh;
+  /* Respect device safe areas (notches) while keeping existing padding baseline */
+  padding: calc(28px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+}
+
+.shell {
+  width: 100%;
+  /* fluid max width: scales from small to large screens */
+  max-width: clamp(720px, 62vw, 1200px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.panel {
+  width: 100%;
+  min-width: 0;
+  background: var(--panel);
+  border: 1px solid #dfe3eb;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.aside {
+  padding: 22px;
+  position: static;
+}
+
+.form-wrap {
+  width: 100%;
+  min-width: 0;
+  padding: 20px;
+}
+
+/* ==========================================================================
+   3) APP HEADER (TOP BRAND BLOCK)
+   ========================================================================== */
+.brand-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.brand-header > div:last-child {
+  width: 100%;
+}
+
+.logo-frame {
+  width: 84px;
+  height: 84px;
+
+}
+
+.logo-img {
+  width: 92%;
+  height: 92%;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #b6dfd9;
+  border-radius: 999px;
+  padding: 5px 11px;
+  color: var(--brand-strong);
+  font-size: 16px;
+  font-weight: 700;
+  background: #ecfdf8;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  line-height: 1.25;
+  font-size: 24px;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.subtitle .my {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-myanmar);
+}
+
+/* ==========================================================================
+   4) COMMON TYPOGRAPHY + LANGUAGE HANDLING
+   ========================================================================== */
+.my,
+.my-line,
+[lang="my"],
+[lang="my-MM"],
+[lang^="my-"],
+:lang(my),
+:lang(my-MM) {
+  font-family: var(--font-myanmar) !important;
+  font-synthesis: none;
+  text-rendering: geometricPrecision;
+  line-height: 1.7;
+  padding-top: 0.04em;
+  padding-bottom: 0.04em;
+  letter-spacing: 0;
+}
+
+.my-auto {
+  font-family: var(--font-myanmar) !important;
+  line-height: 1.72;
+}
+
+.title,
+.page-title,
+.section-title,
+.subsection-title,
+.language-head,
+.mode-title,
+.review-group-title,
+.welcome-criteria-title,
+.side-title,
+.mode-choice-head,
+.eligibility-result .result-title,
+.success-card h3 {
+  font-family: var(--font-title);
+}
+
+.title .my,
+.title .my-line,
+.page-title .my,
+.page-title .my-line,
+.section-title .my,
+.section-title .my-line,
+.subsection-title .my,
+.subsection-title .my-line,
+.language-head .my,
+.language-head .my-line,
+.mode-title .my,
+.mode-title .my-line,
+.review-group-title .my,
+.review-group-title .my-line,
+.welcome-criteria-title .my,
+.welcome-criteria-title .my-line,
+.side-title .my,
+.side-title .my-line,
+.mode-choice-head .my,
+.mode-choice-head .my-line,
+.eligibility-result .result-title .my,
+.eligibility-result .result-title .my-line,
+.success-card h3 .my,
+.success-card h3 .my-line {
+  font-family: var(--font-title) !important;
+}
+
+/* Myanmar title safety: prevent overlap in larger heading sizes. */
+.title.my-auto,
+.page-title.my-auto,
+.section-title.my-auto,
+.subsection-title.my-auto,
+.language-head.my-auto,
+.mode-title.my-auto,
+.review-group-title.my-auto,
+.welcome-criteria-title.my-auto,
+.side-title.my-auto,
+.mode-choice-head.my-auto,
+.eligibility-result .result-title.my-auto,
+.title .my,
+.title .my-line,
+.page-title .my,
+.page-title .my-line,
+.section-title .my,
+.section-title .my-line,
+.subsection-title .my,
+.subsection-title .my-line,
+.language-head .my,
+.language-head .my-line,
+.mode-title .my,
+.mode-title .my-line,
+.review-group-title .my,
+.review-group-title .my-line,
+.welcome-criteria-title .my,
+.welcome-criteria-title .my-line,
+.side-title .my,
+.side-title .my-line,
+.mode-choice-head .my,
+.mode-choice-head .my-line,
+.eligibility-result .result-title .my,
+.eligibility-result .result-title .my-line,
+.title[lang="my"],
+.title[lang="my-MM"],
+.title[lang^="my-"],
+.page-title[lang="my"],
+.page-title[lang="my-MM"],
+.page-title[lang^="my-"],
+.section-title[lang="my"],
+.section-title[lang="my-MM"],
+.section-title[lang^="my-"],
+.subsection-title[lang="my"],
+.subsection-title[lang="my-MM"],
+.subsection-title[lang^="my-"],
+.language-head[lang="my"],
+.language-head[lang="my-MM"],
+.language-head[lang^="my-"],
+.mode-title[lang="my"],
+.mode-title[lang="my-MM"],
+.mode-title[lang^="my-"],
+.review-group-title[lang="my"],
+.review-group-title[lang="my-MM"],
+.review-group-title[lang^="my-"],
+.welcome-criteria-title[lang="my"],
+.welcome-criteria-title[lang="my-MM"],
+.welcome-criteria-title[lang^="my-"],
+.side-title[lang="my"],
+.side-title[lang="my-MM"],
+.side-title[lang^="my-"],
+.mode-choice-head[lang="my"],
+.mode-choice-head[lang="my-MM"],
+.mode-choice-head[lang^="my-"],
+.eligibility-result .result-title[lang="my"],
+.eligibility-result .result-title[lang="my-MM"],
+.eligibility-result .result-title[lang^="my-"] {
+  line-height: var(--my-title-line-height);
+  padding-top: var(--my-title-pad-top);
+  padding-bottom: var(--my-title-pad-bottom);
+}
+
+.bilingual-copy .my-line {
+  display: block;
+  margin-top: 6px;
+}
+
+.bilingual-stack .en-line,
+.bilingual-stack .my-line {
+  display: block;
+}
+
+.bilingual-stack .my-line {
+  margin-top: 4px;
+}
+
+.section-card .bilingual-stack,
+.mode-card .bilingual-stack,
+.subsection-card .bilingual-stack,
+.mode-choice-card .bilingual-stack,
+.pdf-card .bilingual-stack,
+.review-group .bilingual-stack,
+.success-card .bilingual-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.section-card .bilingual-stack .en-line,
+.mode-card .bilingual-stack .en-line,
+.subsection-card .bilingual-stack .en-line,
+.mode-choice-card .bilingual-stack .en-line,
+.pdf-card .bilingual-stack .en-line,
+.review-group .bilingual-stack .en-line,
+.success-card .bilingual-stack .en-line {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.section-card .bilingual-stack .my-line,
+.mode-card .bilingual-stack .my-line,
+.subsection-card .bilingual-stack .my-line,
+.mode-choice-card .bilingual-stack .my-line,
+.pdf-card .bilingual-stack .my-line,
+.review-group .bilingual-stack .my-line,
+.success-card .bilingual-stack .my-line {
+  margin-top: 0;
+  line-height: 1.7;
+}
+
+.section-card .my,
+.section-card .my-line,
+.mode-card .my,
+.mode-card .my-line,
+.subsection-card .my,
+.subsection-card .my-line,
+.mode-choice-card .my,
+.mode-choice-card .my-line,
+.pdf-card .my,
+.pdf-card .my-line,
+.review-group .my,
+.review-group .my-line,
+.success-card .my,
+.success-card .my-line,
+.section-card :lang(my),
+.mode-card :lang(my),
+.subsection-card :lang(my),
+.mode-choice-card :lang(my),
+.pdf-card :lang(my),
+.review-group :lang(my),
+.success-card :lang(my) {
+  font-family: var(--font-myanmar-card) !important;
+}
+
+#eligibilityPage .bilingual-copy {
+  margin-bottom: 10px;
+}
+
+#eligibilityPage .bilingual-copy .my-line {
+  margin-top: 8px;
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   5) WIZARD FRAME + SHARED SURFACES
+   ========================================================================== */
+.wizard-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 12px;
+  margin-bottom: 14px;
+  padding-inline: 20px;
+}
+
+.page-counter {
+  margin: 0;
+  font-size: 14px;
+  color: #334155;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.page-title {
+  display: block;
+  margin: 0;
+  font-size: 20px;
+  color: #0f3a66;
+  line-height: 1.35;
+  text-align: left;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.progress {
+  grid-column: 1 / -1;
+  margin-top: 10px;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: #e6edf7;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(120deg, #0f766e, #0ea5a3);
+  transition: width 0.2s ease;
+}
+
+.form-page {
+  display: none;
+}
+
+.form-page.active {
+  display: block;
+}
+
+.section-card {
+  margin: 0 0 16px;
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  padding: 20px;
+  background: var(--card-bg);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.section-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.45;
+  white-space: pre-line;
+}
+
+.subsection-card {
+  margin-top: 12px;
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+}
+
+.subsection-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.language-block {
+  margin-top: 10px;
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+}
+
+.language-head {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.level-guide {
+  margin: 10px 0 14px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.side-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f3f71;
+}
+
+.criteria-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.criteria-list li {
+  margin: 0 0 8px;
+}
+
+.criteria-list li:last-child {
+  margin-bottom: 0;
+}
+
+.criteria-list li > span {
+  display: block;
+}
+
+.criteria-list li > .my,
+.criteria-list li > .my-line {
+  margin-top: 4px;
+}
+
+/* ==========================================================================
+   6) PAGE 1: POLICY PAGE
+   ========================================================================== */
+#policyPage .policy-decision {
+  margin-top: 14px;
+}
+
+.policy-question {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: #0f172a;
+}
+
+.policy-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.policy-choice {
+  display: block;
+  margin: 0;
+  cursor: pointer;
+}
+
+.policy-choice input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.policy-choice-body {
+  min-height: 88px;
+  border: 2px solid #dbe7f8;
+  border-radius: 12px;
+  background: #f8fbff;
+  padding: 10px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+  animation: policyCardReveal 0.32s ease both;
+}
+
+.policy-choice-title {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.4;
+  color: #1f2937;
+}
+
+.policy-choice:nth-child(2) .policy-choice-body {
+  animation-delay: 0.06s;
+}
+
+#policyAgreementYes + .policy-choice-body {
+  border-color: #86efac;
+  background: linear-gradient(145deg, #ecfdf5 0%, #f0fdf4 100%);
+}
+
+#policyAgreementYes + .policy-choice-body .policy-choice-title {
+  color: #166534;
+}
+
+#policyAgreementNo + .policy-choice-body {
+  border-color: #fdba74;
+  background: linear-gradient(145deg, #fff7ed 0%, #fffbeb 100%);
+}
+
+#policyAgreementNo + .policy-choice-body .policy-choice-title {
+  color: #9a3412;
+}
+
+.policy-choice:hover .policy-choice-body {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+.policy-choice input:focus-visible + .policy-choice-body {
+  border-color: var(--focus-blue);
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+}
+
+.policy-choice input:checked + .policy-choice-body {
+  transform: translateY(-1px) scale(1.01);
+}
+
+#policyAgreementYes:checked + .policy-choice-body {
+  border-color: #16a34a;
+  background: linear-gradient(145deg, #dcfce7 0%, #ecfdf5 100%);
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+  animation: policySelectPop 0.26s ease;
+}
+
+#policyAgreementNo:checked + .policy-choice-body {
+  border-color: #ea580c;
+  background: linear-gradient(145deg, #ffedd5 0%, #fff7ed 100%);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.16);
+  animation: policySelectPop 0.26s ease;
+}
+
+@keyframes policyCardReveal {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes policySelectPop {
+  0% {
+    transform: translateY(0) scale(0.985);
+  }
+  60% {
+    transform: translateY(-1px) scale(1.015);
+  }
+  100% {
+    transform: translateY(-1px) scale(1.01);
+  }
+}
+
+/* ==========================================================================
+   7) PAGE 2: WELCOME PAGE
+   ========================================================================== */
+.welcome-title-center {
+  text-align: center;
+}
+
+.welcome-intro-center {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 760px;
+}
+
+.welcome-intro-center .en-line,
+.welcome-intro-center .my-line {
+  display: block;
+}
+
+.welcome-intro-center .my-line {
+  margin-top: 6px;
+}
+
+#welcomePage .bilingual-copy {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 760px;
+}
+
+.welcome-criteria-title {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  font-size: 20px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+.mode-card {
+  margin-top: 14px;
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  padding: 18px;
+  background: var(--card-bg);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.mode-title {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.mode-choice-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.mode-choice-card {
+  border: 2px solid #e3e8f1;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 18px 16px;
+  min-height: 156px;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.mode-choice-card[data-mode="online"] {
+  border-color: #93c5fd;
+  background: linear-gradient(145deg, #ecfeff 0%, #f0f9ff 100%);
+  box-shadow: 0 8px 20px rgba(8, 145, 178, 0.14);
+  min-height: 198px;
+  padding: 22px 18px;
+}
+
+.mode-choice-card[data-mode="online"] .mode-choice-head {
+  font-size: 14px;
+  color: #0c4a6e;
+}
+
+.mode-choice-card[data-mode="online"] .mode-choice-copy {
+  font-size: 14px;
+  color: #0e7490;
+}
+
+.mode-choice-card[data-mode="pdf"] {
+  border-color: #fdba74;
+  background: linear-gradient(145deg, #fff7ed 0%, #fffbeb 100%);
+  box-shadow: 0 8px 20px rgba(194, 65, 12, 0.12);
+  min-height: 166px;
+}
+
+.mode-choice-card[data-mode="pdf"] .mode-choice-head {
+  color: #7c2d12;
+}
+
+.mode-choice-card[data-mode="pdf"] .mode-choice-copy {
+  color: #b45309;
+}
+
+.mode-choice-card::before {
+  content: "";
+  position: absolute;
+  inset: -38%;
+  background: radial-gradient(circle, rgba(26, 115, 232, 0.2) 0%, rgba(26, 115, 232, 0) 64%);
+  opacity: 0;
+  transform: scale(0.86);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+
+.mode-choice-card[data-mode="online"]::before {
+  background: radial-gradient(circle, rgba(8, 145, 178, 0.24) 0%, rgba(8, 145, 178, 0) 64%);
+}
+
+.mode-choice-card[data-mode="pdf"]::before {
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.24) 0%, rgba(217, 119, 6, 0) 64%);
+}
+
+.mode-choice-card[data-live]::after {
+  content: attr(data-live);
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  line-height: 1.2;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px) rotate(-7deg) scale(0.96);
+  animation: modeHintFloat 3.2s ease-in-out infinite;
+}
+
+.mode-choice-card[data-mode="online"][data-live]::after {
+  color: #ffffff;
+  background: linear-gradient(120deg, #0284c7, #0891b2);
+  box-shadow: 0 6px 12px rgba(2, 132, 199, 0.24);
+}
+
+.mode-choice-card[data-mode="pdf"][data-live]::after {
+  color: #ffffff;
+  background: linear-gradient(120deg, #d97706, #ea580c);
+  box-shadow: 0 6px 12px rgba(234, 88, 12, 0.24);
+}
+
+.mode-choice-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.mode-choice-card:hover {
+  border-color: #8ab4f8;
+  transform: translateY(-1px);
+}
+
+.mode-choice-card:hover::before {
+  opacity: 0.45;
+  transform: scale(1);
+}
+
+.mode-choice-card:focus-visible {
+  outline: none;
+  border-color: var(--focus-blue);
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.18);
+}
+
+.mode-choice-card.is-selected {
+  transform: translateY(-1px);
+  animation: none;
+}
+
+.mode-choice-card[data-mode="online"].is-selected {
+  border-color: #0284c7;
+  background: linear-gradient(145deg, #dff7ff 0%, #e9f5ff 100%);
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18);
+}
+
+.mode-choice-card[data-mode="pdf"].is-selected {
+  border-color: #ea580c;
+  background: linear-gradient(145deg, #fff1de 0%, #fff7e7 100%);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.18);
+}
+
+.mode-choice-card.is-selected::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.mode-choice-head {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.mode-choice-copy {
+  margin: 0;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.55;
+}
+
+@keyframes modeHintFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) rotate(-7deg) scale(0.96);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  85% {
+    opacity: 0;
+    transform: translateY(-4px) rotate(7deg) scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(6px) rotate(-7deg) scale(0.96);
+  }
+}
+
+.mode-error {
+  margin-top: 8px;
+  color: var(--bad);
+}
+
+#onlineModeNote {
+  margin-top: 14px;
+  padding-top: 8px;
+  text-align: center;
+}
+
+.pdf-card {
+  margin-top: 14px;
+  border: 1px solid #f8ddb2;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff8ed;
+  text-align: center;
+}
+
+.pdf-title {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #7c2d12;
+}
+
+.pdf-copy {
+  margin: 0 0 10px;
+  color: #78350f;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.pdf-contact-links {
+  margin: 2px 0 12px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.pdf-contact-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9a3412;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pdf-card .btn {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pdf-upload-panel {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #f1cf9c;
+  text-align: left;
+}
+
+.pdf-upload-grid {
+  margin-top: 8px;
+  gap: 10px;
+}
+
+.pdf-upload-panel label {
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #78350f;
+}
+
+.pdf-upload-panel input[type="file"] {
+  padding: 10px;
+  min-height: 0;
+  border: 1.5px dashed #f5d6a7;
+  background: #fffdf8;
+}
+
+.pdf-upload-panel .field-help {
+  margin-top: 8px;
+  min-height: 1.3em;
+  color: #92400e;
+}
+
+.pdf-upload-panel .field-help.is-error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.pdf-upload-panel .btn {
+  margin-top: 6px;
+  width: 100%;
+}
+
+.pdf-upload-panel.is-disabled {
+  opacity: 0.72;
+}
+
+/* ==========================================================================
+   8) PAGE 3: ELIGIBILITY + RESULT STATES
+   ========================================================================== */
+.eligibility-result {
+  margin-top: 12px;
+  border: 1px solid #dbe7f8;
+  border-radius: 12px;
+  padding: 14px;
+  background: #f8fbff;
+}
+
+.eligibility-result.ok {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+
+.eligibility-result.bad {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.eligibility-result .result-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.eligibility-result .result-copy {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.62;
+  white-space: pre-line;
+}
+
+.not-eligible-reasons {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  color: #7f1d1d;
+  line-height: 1.5;
+}
+
+.not-eligible-reasons li {
+  margin: 0 0 8px;
+}
+
+.not-eligible-reasons .my {
+  display: block;
+  margin-top: 4px;
+  color: #991b1b;
+}
+
+/* ==========================================================================
+   9) PAGE 4/5/6+: FORM FIELDS + CHECKLISTS + GENERIC INPUTS
+   ========================================================================== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+.grid > *,
+.review-row > * {
+  min-width: 0;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+label {
+  display: block;
+  font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
+  color: #1f2937;
+  margin-bottom: 8px;
+  font-weight: 700;
+  line-height: 1.55;
+  white-space: normal;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1.5px solid #dadce0;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 15px 14px;
+  min-height: 56px;
+  font-family: inherit;
+  font-size: clamp(16px, 1rem + 0.2vw, 18px);
+  line-height: 1.65;
+  color: #0f172a;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+  transform-origin: left center;
+}
+
+input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin-right: 8px;
+  accent-color: var(--focus-blue);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--focus-blue);
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.16);
+}
+
+input.is-filled:not([type="checkbox"]):not([type="radio"]):not(.is-invalid),
+select.is-filled:not(.is-invalid),
+textarea.is-filled:not(.is-invalid) {
+  border-color: #0ea5a3;
+  background: #f0fdfa;
+  box-shadow: 0 0 0 2px rgba(14, 165, 163, 0.12);
+}
+
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+  border-color: #dc2626;
+  background: #fff5f5;
+}
+
+input[type="checkbox"].is-invalid {
+  outline: 2px solid #dc2626;
+  outline-offset: 2px;
+}
+
+textarea {
+  min-height: 118px;
+  resize: vertical;
+}
+
+#previousCourses {
+  min-height: 50px;
+  resize: none;
+  overflow: hidden;
+}
+
+#additionalPage textarea {
+  resize: none;
+  overflow: hidden;
+}
+
+.field-help {
+  margin: 6px 0 0;
+  font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.field-error {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkbox-grid label {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #d8e3f1;
+  border-radius: 10px;
+  background: var(--card-bg-soft);
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   10) REVIEW PAGE + FINAL CONFIRM
+   ========================================================================== */
+.review-groups {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.review-group {
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+}
+
+.review-group-title {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.review-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 40%) 1fr;
+  gap: 10px;
+  padding: 8px 0;
+  border-top: 1px dashed #d6e2f2;
+}
+
+.review-row.is-clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.review-row.is-clickable:hover {
+  background: #eef6ff;
+}
+
+.review-row.is-clickable:focus-visible {
+  outline: 2px solid #99f6e4;
+  outline-offset: 1px;
+}
+
+.review-row:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.review-label {
+  font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
+  color: #334155;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.review-value {
+  font-size: 13px;
+  color: #0f172a;
+  line-height: 1.62;
+  white-space: pre-line;
+  word-break: normal;
+}
+
+.review-confirm {
+  margin-top: 14px;
+  border: 1px solid #d2e3fc;
+  border-radius: 12px;
+  background: var(--card-bg-soft);
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.review-confirm input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.review-confirm .en-line,
+.review-confirm .my-line {
+  display: block;
+}
+
+.review-confirm .my-line {
+  margin-top: 4px;
+}
+
+/* Keep Thank You result pages centered. */
+#policyDeclinedPage .section-card,
+#submissionClosedPage .section-card,
+#policyDeclinedPage .section-title,
+#submissionClosedPage .section-title,
+#policyDeclinedPage .note,
+#submissionClosedPage .note {
+  text-align: center;
+}
+
+/* ==========================================================================
+   11) GLOBAL MESSAGES + ACTIONS
+   ========================================================================== */
+.note {
+  margin: 12px 0 0;
+  font-size: 17px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.error {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--bad);
+  min-height: 1.2em;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+#submissionCutoffMessage {
+  margin: 12px 0;
+  padding: 16px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #fef2f2 0%, #fef5f3 100%);
+  color: #7f1d1d;
+  font-size: 15px;
+  line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(180, 28, 28, 0.08);
+}
+
+#submissionCutoffMessage strong {
+  display: block;
+  font-weight: 800;
+  color: #b91c1c;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+#submissionCutoffMessage div {
+  color: #7f1d1d;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn {
+  border: 0;
+  cursor: pointer;
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: clamp(15px, 1rem + 0.3vw, 18px);
+  font-weight: 800;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 12px 26px rgba(15, 118, 110, 0.3);
+  }
+
+  .btn-secondary:hover {
+    box-shadow: 0 10px 22px rgba(3, 105, 161, 0.3);
+  }
+
+  .btn-ghost:hover {
+    border-color: #bfd5f0;
+    background: #f1f6fd;
+  }
+
+  .btn-warn:hover {
+    box-shadow: 0 12px 26px rgba(180, 83, 9, 0.32);
+  }
+
+  .btn:disabled:hover {
+    transform: none;
+    filter: none;
+    box-shadow: none;
+  }
+}
+
+.btn-primary {
+  color: #ffffff;
+  background: linear-gradient(130deg, var(--brand), #0ea5a3);
+  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.23);
+}
+
+.btn-secondary {
+  color: #ffffff;
+  background: linear-gradient(130deg, #0c4a6e, #0369a1);
+}
+
+.btn-ghost {
+  color: #111827;
+  border: 1px solid #d9e3f4;
+  background: #f8fafc;
+}
+
+.btn-warn {
+  color: #ffffff;
+  background: linear-gradient(130deg, #b45309, #f59e0b);
+  box-shadow: 0 10px 22px rgba(180, 83, 9, 0.24);
+}
+
+.actions .btn {
+  min-width: 190px;
+}
+
+#backBtn,
+#nextBtn,
+#submitBtn {
+  font-size: clamp(16px, 1rem + 0.2vw, 19px);
+  min-height: 56px;
+  padding: 14px 20px;
+  line-height: 1.2;
+}
+
+#backBtn.bilingual-stack,
+#nextBtn.bilingual-stack,
+#submitBtn.bilingual-stack {
+  flex-direction: column;
+  gap: 2px;
+}
+
+#backBtn.bilingual-stack .en-line,
+#nextBtn.bilingual-stack .en-line,
+#submitBtn.bilingual-stack .en-line,
+#backBtn.bilingual-stack .my-line,
+#nextBtn.bilingual-stack .my-line,
+#submitBtn.bilingual-stack .my-line {
+  margin: 0;
+}
+
+/* ==========================================================================
+   12) SUCCESS MODAL
+   ========================================================================== */
+.success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.8);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.18s ease;
+  padding: 16px;
+}
+
+.success-modal.show {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+body.modal-open .shell {
+  visibility: hidden;
+}
+
+body.modal-open .success-modal {
+  visibility: visible;
+}
+
+.success-card {
+  width: min(540px, 100%);
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #d6f0ea;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 20px 48px rgba(2, 6, 23, 0.22);
+}
+
+.success-card h3 {
+  margin: 6px 0 8px;
+  color: #0f5132;
+}
+
+.success-card p {
+  margin: 0;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.success-card .success-actions {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+#modalClose {
+  min-width: 230px;
+  min-height: 58px;
+  padding: 14px 28px;
+  font-size: clamp(18px, 1.1rem + 0.2vw, 22px);
+  line-height: 1.15;
+  margin: 0 auto;
+  white-space: nowrap;
+}
+
+/* Keep bilingual OK label in one line inside the modal button. */
+.success-card #modalClose.bilingual-stack {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.success-card #modalClose .en-line,
+.success-card #modalClose .my-line {
+  display: inline;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.success-card #modalClose .my-line::before {
+  content: " / ";
+}
+
+.status-contact-links {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.status-contact-link {
+  font-weight: 700;
+  color: #0c4a6e;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ==========================================================================
+   13) WRAP SAFETY (ALL PAGES)
+   ========================================================================== */
+.title,
+.subtitle,
+.page-title,
+.section-title,
+.note,
+.criteria-list,
+.criteria-list li,
+.criteria-list span,
+label,
+.field-help,
+.mode-choice-head,
+.mode-choice-copy,
+.policy-question,
+.policy-choice-title,
+.review-label,
+.review-value,
+.review-confirm,
+.pdf-copy,
+.pdf-contact-link,
+.subsection-title,
+.language-head,
+.eligibility-result .result-title,
+.eligibility-result .result-copy {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+/* Apps Script mobile fallback: force mobile layout when browser still reports desktop viewport. */
+.force-mobile {
+  --my-title-line-height: var(--my-title-line-height-mobile);
+  --my-title-pad-top: var(--my-title-pad-top-mobile);
+  --my-title-pad-bottom: var(--my-title-pad-bottom-mobile);
+}
+
+.force-mobile body {
+  padding: 12px 10px 18px;
+  min-height: 100dvh;
+}
+
+.force-mobile .shell {
+  max-width: none;
+  width: 100%;
+  min-height: 100dvh;
+  gap: 12px;
+}
+
+.force-mobile .panel {
+  border-radius: 14px;
+}
+
+.force-mobile .aside,
+.force-mobile .form-wrap {
+  padding: 16px 12px;
+}
+
+.force-mobile .section-card,
+.force-mobile .mode-card,
+.force-mobile .subsection-card,
+.force-mobile .language-block,
+.force-mobile .review-group {
+  padding: 18px;
+}
+
+.force-mobile .wizard-top {
+  padding-inline: 18px;
+}
+
+.force-mobile .review-row {
+  grid-template-columns: 1fr;
+}
+
+.force-mobile #welcomePage .welcome-intro-center,
+.force-mobile #welcomePage .bilingual-copy {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: min(100%, 42rem);
+}
+
+.force-mobile .actions {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.force-mobile .actions .btn {
+  width: 100%;
+  min-width: 0;
+}
+
+.force-mobile .checkbox-grid {
+  grid-template-columns: 1fr;
+}
+
+.force-mobile input,
+.force-mobile select,
+.force-mobile textarea {
+  padding: 16px 13px;
+  min-height: 58px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.force-mobile input:not([type="checkbox"]):not([type="radio"]):focus,
+.force-mobile select:focus,
+.force-mobile textarea:focus,
+.force-mobile input:not([type="checkbox"]):not([type="radio"]).is-mobile-focused,
+.force-mobile select.is-mobile-focused,
+.force-mobile textarea.is-mobile-focused {
+  border-color: var(--focus-blue);
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.16);
+}
+
+/* ==========================================================================
+   14) TABLET (<= 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  body {
+    padding: 18px 14px 22px;
+  }
+
+  .shell {
+    gap: 14px;
+  }
+
+  .panel {
+    border-radius: 14px;
+  }
+
+  .aside,
+  .form-wrap {
+    padding: 18px 14px;
+  }
+
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group {
+    padding: 15px;
+  }
+
+  .wizard-top {
+    padding-inline: 15px;
+  }
+
+  /* Prevent iOS Safari zoom-on-focus by keeping controls at least 16px */
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* ==========================================================================
+   15) MOBILE (<= 760px)
+   ========================================================================== */
+@media (max-width: 760px), (max-device-width: 1024px), (hover: none) and (pointer: coarse) {
+  :root {
+    --my-title-line-height: var(--my-title-line-height-mobile);
+    --my-title-pad-top: var(--my-title-pad-top-mobile);
+    --my-title-pad-bottom: var(--my-title-pad-bottom-mobile);
+  }
+
+  body {
+    padding: 12px 10px 18px;
+    min-height: 100dvh;
+  }
+
+  .shell {
+    max-width: none;
+    width: 100%;
+    min-height: 100dvh;
+    gap: 12px;
+  }
+
+  .panel {
+    border-radius: 14px;
+    border-left: 1px solid #dfe3eb;
+    border-right: 1px solid #dfe3eb;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05);
+  }
+
+  .aside,
+  .form-wrap {
+    padding: 16px 12px;
+  }
+
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group {
+    padding: 18px;
+  }
+
+  .wizard-top {
+    padding-inline: 18px;
+  }
+
+  .panel,
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group,
+  .mode-choice-card,
+  .pdf-card,
+  .success-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 16px 13px;
+    min-height: 58px;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]):focus,
+  select:focus,
+  textarea:focus,
+  input:not([type="checkbox"]):not([type="radio"]).is-mobile-focused,
+  select.is-mobile-focused,
+  textarea.is-mobile-focused {
+    border-color: var(--focus-blue);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.16);
+  }
+
+  textarea {
+    min-height: 140px;
+  }
+
+  .logo-frame {
+    width: 66px;
+    height: 66px;
+  }
+
+  .review-row {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .policy-choice-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .policy-choice-body {
+    min-height: 76px;
+    padding: 9px 10px;
+  }
+
+  .mode-choice-card {
+    min-height: 162px;
+    padding: 18px 15px;
+  }
+
+  .mode-choice-card[data-mode="online"] {
+    min-height: 176px;
+  }
+
+  .mode-choice-card[data-mode="pdf"] {
+    min-height: 160px;
+  }
+
+  .welcome-intro-center,
+  #welcomePage .bilingual-copy {
+    max-width: min(100%, 42rem);
+  }
+
+  .title {
+    font-size: clamp(26px, 7vw, 34px);
+    line-height: 1.2;
+  }
+
+  .page-title {
+    font-size: clamp(22px, 5.9vw, 29px);
+    line-height: 1.26;
+  }
+
+  .section-title {
+    font-size: clamp(21px, 5.5vw, 27px);
+    line-height: 1.32;
+  }
+
+  .subtitle {
+    font-size: clamp(14px, 3.8vw, 17px);
+  }
+
+  .note,
+  .criteria-list,
+  .mode-choice-copy,
+  .pdf-copy,
+  .pdf-contact-link,
+  .review-value,
+  .eligibility-result .result-copy,
+  .success-card p {
+    font-size: clamp(16px, 4.6vw, 20px);
+    line-height: 1.62;
+  }
+
+  /* Mobile Burmese safety: more vertical space and no border clipping. */
+  .my,
+  .my-line,
+  [lang="my"],
+  [lang="my-MM"],
+  [lang^="my-"],
+  :lang(my),
+  :lang(my-MM) {
+    line-height: 1.84;
+    padding-top: 0.06em;
+    padding-bottom: 0.1em;
+  }
+
+  .subtitle,
+  .note,
+  .criteria-list li,
+  .criteria-list li span,
+  .mode-choice-copy,
+  .pdf-copy,
+  .eligibility-result .result-copy,
+  .review-confirm span {
+    line-height: 1.68;
+    padding-bottom: 0.08em;
+  }
+
+  .criteria-list li,
+  .review-confirm,
+  .eligibility-result {
+    padding-bottom: 0.16em;
+  }
+
+  .side-title,
+  .mode-title,
+  .subsection-title,
+  .language-head,
+  .review-group-title,
+  .eligibility-result .result-title,
+  .success-card h3 {
+    font-size: clamp(19px, 5.1vw, 23px);
+  }
+
+  .welcome-criteria-title {
+    font-size: clamp(21px, 5.6vw, 25px);
+    line-height: 1.35;
+  }
+
+  .mode-choice-head,
+  .mode-choice-card[data-mode="online"] .mode-choice-head,
+  .mode-choice-card[data-mode="pdf"] .mode-choice-head {
+    font-size: clamp(18px, 4.9vw, 22px);
+  }
+
+  .mode-choice-card[data-mode="online"] .mode-choice-copy,
+  .mode-choice-card[data-mode="pdf"] .mode-choice-copy {
+    font-size: clamp(16px, 4.4vw, 19px);
+  }
+
+  .policy-question {
+    font-size: clamp(17px, 4.4vw, 20px);
+  }
+
+  .policy-choice-title {
+    font-size: clamp(14px, 3.9vw, 17px);
+  }
+
+  .field-help,
+  .review-label,
+  .level-guide,
+  .page-counter,
+  .brand-chip {
+    font-size: clamp(13px, 3.8vw, 16px);
+    line-height: 1.42;
+  }
+
+  .btn {
+    font-size: clamp(17px, 4.5vw, 20px);
+  }
+
+  #backBtn,
+  #nextBtn,
+  #submitBtn {
+    min-height: 60px;
+    padding: 14px 18px;
+    font-size: clamp(18px, 4.7vw, 21px);
+  }
+
+  .review-confirm {
+    font-size: clamp(15px, 4vw, 18px);
+    line-height: 1.62;
+  }
+
+  .checkbox-grid label {
+    font-size: clamp(14px, 3.9vw, 17px);
+    padding: 10px 12px;
+    line-height: 1.6;
+  }
+
+  .form-page .grid {
+    gap: 12px;
+  }
+
+  .form-page .grid > div:not(.subsection-card):not(.language-block):not(.computer-skill-group) {
+    background: var(--card-bg-soft);
+    border: 1px solid #dbe5f2;
+    border-radius: 12px;
+    padding: 14px 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .shell,
+  .panel,
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group,
+  .form-page,
+  .grid,
+  .grid > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .mode-choice-card[data-live]::after {
+    right: 8px;
+    top: 8px;
+    font-size: 12px;
+    padding: 4px 9px;
+    line-height: 1.2;
+    max-width: min(220px, calc(100% - 16px));
+    text-align: center;
+    white-space: normal;
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .policy-choice-body,
+  #policyAgreementYes:checked + .policy-choice-body,
+  #policyAgreementNo:checked + .policy-choice-body {
+    animation: none;
+  }
+
+  body,
+  p,
+  .subtitle,
+  .note,
+  .review-value,
+  .mode-choice-copy,
+  .pdf-copy,
+  label {
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+    text-wrap: pretty;
+  }
+}
+
+/* ==========================================================================
+   16) SMALL MOBILE (<= 360px)
+   ========================================================================== */
+@media (max-width: 360px) {
+  body {
+    padding: 10px 8px 16px;
+  }
+
+  .aside,
+  .form-wrap {
+    padding: 14px;
+  }
+
+  .section-card,
+  .mode-card,
+  .subsection-card,
+  .language-block,
+  .review-group {
+    padding: 14px;
+  }
+
+  .wizard-top {
+    padding-inline: 14px;
+  }
+}
+/* ==========================================================================
+   17) TEXT FLOW & LARGE-SCREEN TWEAKS
+   Improve hyphenation, balanced wrapping and add large-screen spacing.
+   ========================================================================== */
+
+body,
+p,
+.subtitle,
+.note,
+.review-value,
+.mode-choice-copy,
+.pdf-copy,
+label {
+  -webkit-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+  -webkit-font-smoothing: antialiased;
+  text-wrap: pretty;
+}
+
+@media (min-width: 1400px) {
+  body {
+    padding: calc(36px + env(safe-area-inset-top)) calc(30px + env(safe-area-inset-right)) calc(36px + env(safe-area-inset-bottom)) calc(30px + env(safe-area-inset-left));
+  }
+
+  .shell {
+    gap: 22px;
+  }
+
+  .title {
+    font-size: clamp(30px, 2.6vw, 40px);
+  }
+
+  .page-title {
+    font-size: clamp(22px, 1.6vw, 32px);
+  }
+}
+@supports (text-wrap: balance) {
+  .title,
+  .page-title,
+  .section-title,
+  .subtitle,
+  .policy-question {
+    text-wrap: balance;
+  }
+}
