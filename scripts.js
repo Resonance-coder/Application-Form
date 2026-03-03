@@ -1285,7 +1285,7 @@ const FALLBACK_GAS_URL = "";
       if (!applicantName) {
         if (showError) {
           setPdfUploadStatus(
-            "Please enter applicant name before uploading.\n(ဖိုင်တင်မည့်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
+            "Please enter applicant name before uploading.\n(ဖိုင်မတင်မည့်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
             true
           );
         }
@@ -1295,7 +1295,7 @@ const FALLBACK_GAS_URL = "";
       if (!file) {
         if (showError) {
           setPdfUploadStatus(
-            "Please choose a completed PDF file to upload.\n(ဖြည့်ပြီး PDF ဖိုင်ကို ရွေးချယ်ပါ။)",
+            "Please choose a completed PDF file to upload.\n(ဖြည့်ထားသော PDF ဖိုင်ကိုရွေးချယ်၍ တင်သွင်းပါ။)",
             true
           );
         }
@@ -1422,7 +1422,7 @@ const FALLBACK_GAS_URL = "";
       if (pdfUploadSubmitBtn) {
         pdfUploadSubmitBtn.textContent = "Uploading... / (တင်နေသည်...)";
       }
-      setPdfUploadStatus("Uploading completed PDF file... / (ဖြည့်ပြီး PDF ဖိုင်ကို တင်နေပါသည်...)", false);
+      setPdfUploadStatus("Uploading completed PDF file... / (အချက်အလက်ဖြည့်သွင်းထားသော PDF ဖိုင်ကို တင်နေပါသည်...)", false);
 
       try {
         const fileBase64 = await readFileAsBase64(selectedFile);
@@ -1449,7 +1449,7 @@ const FALLBACK_GAS_URL = "";
 
         const savedUrl = getSafeHttpUrl(response.result && response.result.pdfFileUrl);
         const successHtml =
-          "Your completed PDF was uploaded successfully.<br>(ဖြည့်ပြီး PDF ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။)" +
+          "Your completed PDF was uploaded successfully.<br>(အချက်အလက်ဖြည့်သွင်းထားသော PDF ဖိုင်ကို အောင်မြင်စွာ တင်ပြီးပါပြီ။)" +
           (savedUrl
             ? '<span class="status-contact-links"><a class="status-contact-link" href="' +
               savedUrl +
@@ -2012,15 +2012,15 @@ const FALLBACK_GAS_URL = "";
         ageTotalMonths > maxAgeMonths
       ) {
         reasons.push({
-          en: "Age must be between 17 years 5 months and 25 years old.",
-          my: "(အသက်သည် ၁၇ နှစ် ၅ လမှ ၂၅ နှစ်အတွင်း ဖြစ်ရမည်။)"
+          en: "Age must be between 18 years and 25 years old.",
+          my: "(အသက်သည် ၁၈ နှစ် မှ ၂၅ နှစ်အတွင်း ဖြစ်ရမည်။)"
         });
       }
 
       if (attendanceValue === "no") {
         reasons.push({
           en: "Applicant must be able to attend in person.",
-          my: "(သင်တန်းကို လူကိုယ်တိုင် လာရောက်တက်ရောက်နိုင်ရမည်။)"
+          my: "(သင်တန်းကို လူကိုယ်တိုင် တက်ရောက်နိုင်ရမည်။)"
         });
       }
 
@@ -2073,7 +2073,7 @@ const FALLBACK_GAS_URL = "";
         eligibilityResultTitle.textContent = "Not Eligible\n(လက်ရှိတွင် လျှောက်ထားရန် မကိုက်ညီသေးပါ)";
         eligibilityResultCopy.textContent =
           "Thank you for your interest in our program. Based on your responses, you are currently not eligible.\n" +
-          "(ကျွန်ုပ်တို့၏ သင်တန်းကို စိတ်ဝင်စားသည့်အတွက် ကျေးဇူးတင်ပါသည်။ သင်ဖြည့်သွင်းထားသော အချက်အလက်များအရ လက်ရှိအချိန်တွင် ဝင်ခွင့်မပြည့်မီပါ။)\n\n" +
+          "(ကျွန်ုပ်တို့၏ သင်တန်းကို စိတ်ဝင်စားသည့်အတွက် ကျေးဇူးတင်ပါသည်။ သင်ဖြည့်သွင်းထားသော အချက်အလက်များအရ လက်ရှိအချိန်တွင် ဝင်ခွင့်မရပါ။)\n\n" +
           reasonLines;
       }
     }
