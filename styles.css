@@ -107,8 +107,8 @@ html {
 html,
 body {
   max-width: 100%;
-  /* Keep native lateral panning fluid when users pinch-zoom. */
-  overflow-x: visible;
+  /* Prevent page-wide horizontal overflow/bottom scrollbar. */
+  overflow-x: hidden;
   touch-action: auto;
 }
 
