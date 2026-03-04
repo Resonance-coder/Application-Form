@@ -30,6 +30,19 @@
   font-display: swap;
   unicode-range: U+1000-109F, U+A9E0-A9FF, U+AA60-AA7F;
 }
+
+@font-face {
+  font-family: "Myanmar3";
+  src:
+    local("Myanmar3"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.woff") format("woff"),
+    url("https://mmwebfonts.comquas.com/fonts/myanmar3.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+1000-109F, U+A9E0-A9FF, U+AA60-AA7F;
+}
+
 /* ==========================================================================
    1) DESIGN TOKENS
    ========================================================================== */
@@ -57,13 +70,13 @@
   /* Part B: English heading/title text */
   --font-en-title: "Inter", "Segoe UI", Arial, sans-serif;
   /* Part C: Burmese generic text (.my / .my-line / :lang(my)) */
-  --font-my-body:"Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  --font-my-body: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
   /* Part D: Burmese text inside cards/sections */
   --font-my-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
   /* Part E: Burmese text inside headings/titles */
   --font-my-title: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
   /* Part F: Burmese fallback for mixed EN/MM text without .my wrappers */
-  --font-my-fallback:"Myanmar Thuriya","Myanmar3", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  --font-my-fallback: "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
 
   /* Policy page part labels (manual override points) */
   --font-my-policy-terms: var(--font-my-card);
@@ -667,7 +680,7 @@ body {
 
 .policy-question {
   margin: 0 0 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 800;
   line-height: 1.5;
   color: #0f172a;
@@ -867,13 +880,21 @@ body {
   padding: 22px 18px;
 }
 
+.mode-choice-card[data-mode="online"] .mode-choice-head,
+.mode-choice-card[data-mode="pdf"] .mode-choice-head {
+  font-size: 16px;
+}
+
 .mode-choice-card[data-mode="online"] .mode-choice-head {
-  font-size: 14px;
   color: #0c4a6e;
 }
 
-.mode-choice-card[data-mode="online"] .mode-choice-copy {
+.mode-choice-card[data-mode="online"] .mode-choice-copy,
+.mode-choice-card[data-mode="pdf"] .mode-choice-copy {
   font-size: 14px;
+}
+
+.mode-choice-card[data-mode="online"] .mode-choice-copy {
   color: #0e7490;
 }
 
@@ -916,7 +937,7 @@ body {
   position: absolute;
   right: 12px;
   top: 10px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.2px;
   border-radius: 999px;
@@ -994,7 +1015,7 @@ body {
 
 .mode-choice-copy {
   margin: 0;
-  font-size: 16px;
+  font-size: 14px;
   color: #475569;
   line-height: 1.55;
 }
