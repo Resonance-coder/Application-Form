@@ -9,6 +9,13 @@
   font-weight: 400;
   font-display: swap;
 }
+@font-face {
+  font-family: "Myanmar Thuriya";
+  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Thuriya-Api@main/MyanmarThuriya_add_latin_volt.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 /* Load Myanmar3 directly from the same host to avoid external DNS dependency. */
 @font-face {
   font-family: "Myanmar3";
@@ -58,9 +65,9 @@
   /* Myanmar script fallback for generic .my text */
   --font-myanmar: "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
   /* Card text Burmese font */
-  --font-myanmar-card: "Tharlon", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
+  --font-myanmar-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
   /* Title/headline font */
-  --font-title: "Tharlon", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
+  --font-title: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
 }
 
 /* ==========================================================================
@@ -2149,5 +2156,115 @@ label {
   .subtitle,
   .policy-question {
     text-wrap: balance;
+  }
+}
+
+/* ==========================================================================
+   18) GLOBAL FONT NORMALIZATION (ALL BROWSERS + DEVICES)
+   ========================================================================== */
+:root {
+  --fs-title-global: clamp(22px, 2.1vw, 32px);
+  --fs-page-title-global: clamp(18px, 1.6vw, 26px);
+  --fs-section-title-global: clamp(16px, 1.2vw, 22px);
+  --fs-body-global: clamp(14px, 0.55vw + 0.72rem, 17px);
+  --fs-small-global: clamp(12px, 0.3vw + 0.68rem, 14px);
+  --fs-btn-global: clamp(15px, 0.7vw + 0.75rem, 18px);
+  --fs-control-global: clamp(16px, 0.35vw + 0.84rem, 18px);
+}
+
+html {
+  -moz-text-size-adjust: 100%;
+}
+
+body {
+  font-size: var(--fs-body-global);
+}
+
+.title {
+  font-size: var(--fs-title-global);
+}
+
+.page-title {
+  font-size: var(--fs-page-title-global);
+}
+
+.section-title,
+.subsection-title,
+.mode-title,
+.language-head,
+.review-group-title,
+.welcome-criteria-title,
+.side-title,
+.mode-choice-head,
+.eligibility-result .result-title,
+.success-card h3 {
+  font-size: var(--fs-section-title-global);
+}
+
+label,
+.subtitle,
+.note,
+.criteria-list,
+.mode-choice-copy,
+.pdf-copy,
+.pdf-contact-link,
+.review-value,
+.review-confirm,
+.review-label,
+.eligibility-result .result-copy,
+.brand-chip,
+.policy-question {
+  font-size: var(--fs-body-global);
+}
+
+.page-counter,
+.field-help,
+.level-guide,
+.error,
+.policy-choice-title {
+  font-size: var(--fs-small-global);
+}
+
+.btn,
+#backBtn,
+#nextBtn,
+#submitBtn,
+#modalClose {
+  font-size: var(--fs-btn-global);
+}
+
+input,
+select,
+textarea {
+  font-size: var(--fs-control-global);
+}
+
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  :root {
+    --fs-title-global: clamp(21px, 5.5vw, 28px);
+    --fs-page-title-global: clamp(17px, 4.8vw, 23px);
+    --fs-section-title-global: clamp(15px, 4.2vw, 20px);
+    --fs-body-global: clamp(13px, 3.6vw, 16px);
+    --fs-small-global: clamp(12px, 3vw, 14px);
+    --fs-btn-global: clamp(15px, 4vw, 17px);
+    --fs-control-global: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  :root {
+    --fs-title-global: clamp(20px, 6.2vw, 25px);
+    --fs-page-title-global: clamp(16px, 5.2vw, 20px);
+    --fs-section-title-global: clamp(15px, 4.6vw, 18px);
+  }
+}
+
+@media (min-width: 1400px) {
+  :root {
+    --fs-title-global: clamp(28px, 2.2vw, 40px);
+    --fs-page-title-global: clamp(22px, 1.5vw, 30px);
+    --fs-section-title-global: clamp(18px, 1vw, 24px);
+    --fs-body-global: clamp(15px, 0.5vw + 0.72rem, 18px);
+    --fs-btn-global: clamp(16px, 0.8vw + 0.8rem, 20px);
   }
 }
