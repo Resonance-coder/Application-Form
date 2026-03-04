@@ -62,14 +62,32 @@
   --my-title-line-height-mobile: 2.02;
   --my-title-pad-top-mobile: 0.1em;
   --my-title-pad-bottom-mobile: 0.14em;
-  /* Body text default */
-  --font-latin: "Inter", "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Segoe UI", Arial, sans-serif;
-  /* Myanmar script fallback for generic .my text */
-  --font-myanmar: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
-  /* Card text Burmese font */
-  --font-myanmar-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
-  /* Title/headline font */
-  --font-title: "Inter", "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Segoe UI", Arial, sans-serif;
+  /* ======================================================================
+     LANGUAGE FONT MAP (LABELLED PARTS)
+     ====================================================================== */
+  /* Part A: English body text */
+  --font-en-body: "Inter", "Segoe UI", Arial, sans-serif;
+  /* Part B: English heading/title text */
+  --font-en-title: "Inter", "Segoe UI", Arial, sans-serif;
+  /* Part C: Burmese generic text (.my / .my-line / :lang(my)) */
+  --font-my-body: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  /* Part D: Burmese text inside cards/sections */
+  --font-my-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
+  /* Part E: Burmese text inside headings/titles */
+  --font-my-title: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
+  /* Part F: Burmese fallback for mixed EN/MM text without .my wrappers */
+  --font-my-fallback: "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+
+  /* Policy page part labels (manual override points) */
+  --font-my-policy-terms: var(--font-my-card);
+  --font-my-policy-data-processing: var(--font-my-card);
+
+  /* Backward-compatible aliases used by existing selectors */
+  --font-latin: var(--font-en-body), var(--font-my-fallback);
+  --font-myanmar: var(--font-my-body);
+  --font-myanmar-card: var(--font-my-card);
+  --font-title: var(--font-en-title), var(--font-my-fallback);
+  --font-title-my: var(--font-my-title);
 }
 
 /* ==========================================================================
@@ -253,6 +271,27 @@ body {
   line-height: 1.72;
 }
 
+/* Optional utility labels for manual per-element font control */
+.font-part-en-body {
+  font-family: var(--font-en-body) !important;
+}
+
+.font-part-en-title {
+  font-family: var(--font-en-title) !important;
+}
+
+.font-part-my-body {
+  font-family: var(--font-my-body) !important;
+}
+
+.font-part-my-card {
+  font-family: var(--font-my-card) !important;
+}
+
+.font-part-my-title {
+  font-family: var(--font-my-title) !important;
+}
+
 .title,
 .page-title,
 .section-title,
@@ -292,7 +331,7 @@ body {
 .eligibility-result .result-title .my-line,
 .success-card h3 .my,
 .success-card h3 .my-line {
-  font-family: var(--font-title) !important;
+  font-family: var(--font-title-my) !important;
 }
 
 /* Myanmar title safety: prevent overlap in larger heading sizes. */
@@ -437,6 +476,43 @@ body {
 .review-group :lang(my),
 .success-card :lang(my) {
   font-family: var(--font-myanmar-card) !important;
+}
+
+/* Keep Burmese heading parts on heading font, even inside cards */
+.section-card .section-title .my,
+.section-card .section-title .my-line,
+.section-card .subsection-title .my,
+.section-card .subsection-title .my-line,
+.section-card .language-head .my,
+.section-card .language-head .my-line,
+.section-card .side-title .my,
+.section-card .side-title .my-line,
+.section-card .welcome-criteria-title .my,
+.section-card .welcome-criteria-title .my-line,
+.mode-card .mode-title .my,
+.mode-card .mode-title .my-line,
+.mode-choice-card .mode-choice-head .my,
+.mode-choice-card .mode-choice-head .my-line,
+.review-group .review-group-title .my,
+.review-group .review-group-title .my-line,
+.section-card .eligibility-result .result-title .my,
+.section-card .eligibility-result .result-title .my-line,
+.success-card h3 .my,
+.success-card h3 .my-line {
+  font-family: var(--font-title-my) !important;
+}
+
+/* Policy page labels: separate Burmese font by section */
+#policyPage .policy-terms-part .my,
+#policyPage .policy-terms-part .my-line,
+#policyPage .policy-terms-part :lang(my) {
+  font-family: var(--font-my-policy-terms) !important;
+}
+
+#policyPage .policy-data-part .my,
+#policyPage .policy-data-part .my-line,
+#policyPage .policy-data-part :lang(my) {
+  font-family: var(--font-my-policy-data-processing) !important;
 }
 
 #eligibilityPage .bilingual-copy {
