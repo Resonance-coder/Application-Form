@@ -15,6 +15,8 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
+  /* Keep English glyphs on Inter while using this face for Myanmar script. */
+  unicode-range: U+1000-109F, U+A9E0-A9FF, U+AA60-AA7F;
 }
 /* Load Myanmar3 directly from the same host to avoid external DNS dependency. */
 @font-face {
@@ -61,13 +63,13 @@
   --my-title-pad-top-mobile: 0.1em;
   --my-title-pad-bottom-mobile: 0.14em;
   /* Body text default */
-  --font-latin: "Myanmar Ethic", "Inter", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Segoe UI", Arial, sans-serif;
+  --font-latin: "Inter", "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Segoe UI", Arial, sans-serif;
   /* Myanmar script fallback for generic .my text */
-  --font-myanmar: "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  --font-myanmar: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
   /* Card text Burmese font */
   --font-myanmar-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
   /* Title/headline font */
-  --font-title: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
+  --font-title: "Inter", "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Segoe UI", Arial, sans-serif;
 }
 
 /* ==========================================================================
