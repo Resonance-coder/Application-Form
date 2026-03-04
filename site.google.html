@@ -23,6 +23,13 @@
    0) FONT LOADING
    ========================================================================== */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@font-face {
+  font-family: "Myanmar Thuriya";
+  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Thuriya-Api@main/MyanmarThuriya_add_latin_volt.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
 /* Load Myanmar3 directly from the same host to avoid external DNS dependency. */
 @font-face {
   font-family: "Myanmar3";
@@ -80,7 +87,7 @@
   --layout-gap: 20px;
   /* Keep Myanmar fallbacks here so Burmese text without .my class still renders correctly. */
   --font-latin: "Inter", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Segoe UI", Arial, sans-serif;
-  --font-myanmar: "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", "Tharlon", sans-serif;
+  --font-myanmar: "Myanmar Thuriya", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
 }
 
 /* ==========================================================================
@@ -4653,7 +4660,7 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbw1MGOV7TI7HLmaoqEMrdXU
       try {
         const response = await fetch(GAS_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          // Apps Script Web Apps reject CORS preflight OPTIONS, so avoid JSON headers here.
           body: JSON.stringify(payload)
         });
 
@@ -4682,6 +4689,30 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbw1MGOV7TI7HLmaoqEMrdXU
           return {
             ok: false,
             error: parsed.message ? String(parsed.message) : "Submission failed on server."
+          };
+        }
+        if (parsed && parsed.status === "closed") {
+          return {
+            ok: false,
+            closed: true,
+            error: parsed.message ? String(parsed.message) : "Application submission is closed."
+          };
+        }
+        if (!parsed || typeof parsed !== "object") {
+          const preview = String(responseText || "").trim().slice(0, 180);
+          return {
+            ok: false,
+            error:
+              "Unexpected response from submission service. Check Apps Script deployment access and URL." +
+              (preview ? " Response preview: " + preview : "")
+          };
+        }
+        if (parsed.status !== "ok") {
+          return {
+            ok: false,
+            error: parsed.message
+              ? String(parsed.message)
+              : "Submission service returned an unknown response."
           };
         }
 
@@ -5231,4 +5262,3 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbw1MGOV7TI7HLmaoqEMrdXU
   </script>
 </body>
 </html>
-
