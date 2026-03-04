@@ -24,6 +24,13 @@
    ========================================================================== */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @font-face {
+  font-family: "Myanmar Ethic";
+  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Ethic-api@main/Myanmar%20Ethnic%20v1.01.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
   font-family: "Myanmar Thuriya";
   src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Thuriya-Api@main/MyanmarThuriya_add_latin_volt.ttf") format("truetype");
   font-style: normal;
@@ -87,9 +94,32 @@
   --layout-max-width: 1220px;
   --layout-sidebar-width: clamp(280px, 30vw, 360px);
   --layout-gap: 20px;
-  /* Keep Myanmar fallbacks here so Burmese text without .my class still renders correctly. */
-  --font-latin: "Inter", "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Segoe UI", Arial, sans-serif;
-  --font-myanmar: "Myanmar Thuriya", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  /* ======================================================================
+     LANGUAGE FONT MAP (LABELLED PARTS)
+     ====================================================================== */
+  /* Part A: English body text */
+  --font-en-body: "Inter", "Segoe UI", Arial, sans-serif;
+  /* Part B: English heading/title text */
+  --font-en-title: "Inter", "Segoe UI", Arial, sans-serif;
+  /* Part C: Burmese generic text (.my / .my-line / :lang(my)) */
+  --font-my-body: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Yunghkio", "Masterpiece Uni Sans", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+  /* Part D: Burmese text inside cards/sections */
+  --font-my-card: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", "Padauk", sans-serif;
+  /* Part E: Burmese text inside headings/titles */
+  --font-my-title: "Myanmar Thuriya", "Myanmar Ethic", "MyMyanmar Universal", "Myanmar3", "Noto Sans Myanmar", sans-serif;
+  /* Part F: Burmese fallback for mixed EN/MM text without .my wrappers */
+  --font-my-fallback: "Myanmar Thuriya", "Myanmar3", "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+
+  /* Policy page part labels (manual override points) */
+  --font-my-policy-terms: var(--font-my-card);
+  --font-my-policy-data-processing: var(--font-my-card);
+
+  /* Backward-compatible aliases used by existing selectors */
+  --font-latin: var(--font-en-body), var(--font-my-fallback);
+  --font-myanmar: var(--font-my-body);
+  --font-myanmar-card: var(--font-my-card);
+  --font-title: var(--font-en-title), var(--font-my-fallback);
+  --font-title-my: var(--font-my-title);
 }
 
 /* ==========================================================================
@@ -385,6 +415,69 @@ body {
   line-height: 1.72;
 }
 
+/* Optional utility labels for manual per-element font control */
+.font-part-en-body {
+  font-family: var(--font-en-body) !important;
+}
+
+.font-part-en-title {
+  font-family: var(--font-en-title) !important;
+}
+
+.font-part-my-body {
+  font-family: var(--font-my-body) !important;
+}
+
+.font-part-my-card {
+  font-family: var(--font-my-card) !important;
+}
+
+.font-part-my-title {
+  font-family: var(--font-my-title) !important;
+}
+
+.title,
+.page-title,
+.section-title,
+.subsection-title,
+.language-head,
+.mode-title,
+.review-group-title,
+.welcome-criteria-title,
+.side-title,
+.mode-choice-head,
+.eligibility-result .result-title,
+.success-card h3 {
+  font-family: var(--font-title);
+}
+
+.title .my,
+.title .my-line,
+.page-title .my,
+.page-title .my-line,
+.section-title .my,
+.section-title .my-line,
+.subsection-title .my,
+.subsection-title .my-line,
+.language-head .my,
+.language-head .my-line,
+.mode-title .my,
+.mode-title .my-line,
+.review-group-title .my,
+.review-group-title .my-line,
+.welcome-criteria-title .my,
+.welcome-criteria-title .my-line,
+.side-title .my,
+.side-title .my-line,
+.mode-choice-head .my,
+.mode-choice-head .my-line,
+.eligibility-result .result-title .my,
+.eligibility-result .result-title .my-line,
+.success-card h3 .my,
+.success-card h3 .my-line {
+  font-family: var(--font-title-my) !important;
+}
+
 /* Myanmar title safety: prevent overlap in larger heading sizes. */
 .title.my-auto,
 .page-title.my-auto,
@@ -501,6 +594,67 @@ body {
 #eligibilityPage label.bilingual-label .my-line {
   margin-left: 0;
   margin-top: 4px;
+}
+
+.section-card .my,
+.section-card .my-line,
+.mode-card .my,
+.mode-card .my-line,
+.subsection-card .my,
+.subsection-card .my-line,
+.mode-choice-card .my,
+.mode-choice-card .my-line,
+.pdf-card .my,
+.pdf-card .my-line,
+.review-group .my,
+.review-group .my-line,
+.success-card .my,
+.success-card .my-line,
+.section-card :lang(my),
+.mode-card :lang(my),
+.subsection-card :lang(my),
+.mode-choice-card :lang(my),
+.pdf-card :lang(my),
+.review-group :lang(my),
+.success-card :lang(my) {
+  font-family: var(--font-myanmar-card) !important;
+}
+
+/* Keep Burmese heading parts on heading font, even inside cards */
+.section-card .section-title .my,
+.section-card .section-title .my-line,
+.section-card .subsection-title .my,
+.section-card .subsection-title .my-line,
+.section-card .language-head .my,
+.section-card .language-head .my-line,
+.section-card .side-title .my,
+.section-card .side-title .my-line,
+.section-card .welcome-criteria-title .my,
+.section-card .welcome-criteria-title .my-line,
+.mode-card .mode-title .my,
+.mode-card .mode-title .my-line,
+.mode-choice-card .mode-choice-head .my,
+.mode-choice-card .mode-choice-head .my-line,
+.review-group .review-group-title .my,
+.review-group .review-group-title .my-line,
+.section-card .eligibility-result .result-title .my,
+.section-card .eligibility-result .result-title .my-line,
+.success-card h3 .my,
+.success-card h3 .my-line {
+  font-family: var(--font-title-my) !important;
+}
+
+/* Policy page labels: separate Burmese font by section */
+#policyPage .policy-terms-part .my,
+#policyPage .policy-terms-part .my-line,
+#policyPage .policy-terms-part :lang(my) {
+  font-family: var(--font-my-policy-terms) !important;
+}
+
+#policyPage .policy-data-part .my,
+#policyPage .policy-data-part .my-line,
+#policyPage .policy-data-part :lang(my) {
+  font-family: var(--font-my-policy-data-processing) !important;
 }
 
 /* ==========================================================================
@@ -2135,8 +2289,8 @@ label,
               လျှောက်လွှာကို ဆက်လက်ဖြည့်ရန်အတွက် အောက်ပါ သင်တန်းစည်းမျဉ်းများနှင့် ဒေတာအသုံးပြုမှု မူဝါဒကို သေချာဖတ်ရှုပေးပါ။
             </p>
 
-            <div class="subsection-card">
-              <p class="subsection-title">Program Terms / (သင်တန်းစည်းမျဉ်းများ)</p>
+            <div class="subsection-card policy-terms-part">
+              <p class="subsection-title policy-terms-title">Program Terms / (သင်တန်းစည်းမျဉ်းများ)</p>
               <ol class="criteria-list">
                 <li>
                   <span>Attend classes regularly and arrive on time.</span>
@@ -2157,8 +2311,8 @@ label,
               </ol>
             </div>
 
-            <div class="subsection-card">
-              <p class="subsection-title">Data Processing Policy / (ဒေတာအသုံးပြုမှု မူဝါဒ)</p>
+            <div class="subsection-card policy-data-part">
+              <p class="subsection-title policy-data-title">Data Processing Policy / (ဒေတာအသုံးပြုမှု မူဝါဒ)</p>
               <ol class="criteria-list">
                 <li>
                   <span>Your information is collected for application review and training management.</span>
