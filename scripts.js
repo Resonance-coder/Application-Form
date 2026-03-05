@@ -175,6 +175,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     let bilingualFormatInProgress = false;
     let touchScrollGuardStarted = false;
     let touchGestureStartPoint = null;
+    let pinchGestureStartDistance = 0;
     let mobileFocusAssistSuspendUntil = 0;
     let lastTouchMoveAt = 0;
     let lastScrollAt = 0;
@@ -384,6 +385,17 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       return Number.isFinite(scale) && scale > 1.02;
     }
 
+    function getTwoTouchDistance(touches) {
+      if (!touches || touches.length < 2) {
+        return 0;
+      }
+      const t1 = touches[0];
+      const t2 = touches[1];
+      const dx = Number(t2.clientX || 0) - Number(t1.clientX || 0);
+      const dy = Number(t2.clientY || 0) - Number(t1.clientY || 0);
+      return Math.sqrt((dx * dx) + (dy * dy));
+    }
+
     function resetHorizontalScrollToZero() {
       if (typeof window === "undefined" || typeof window.scrollTo !== "function") {
         return;
@@ -451,6 +463,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
       form.addEventListener("touchstart", function (event) {
         const touch = event && event.touches && event.touches[0];
+        pinchGestureStartDistance = getTwoTouchDistance(event && event.touches);
         if (!touch) {
           touchGestureStartPoint = null;
           return;
@@ -482,6 +495,36 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
         lastTouchMoveAt = Date.now();
         suspendMobileFocusAssist(MOBILE_FOCUS_ASSIST_SUSPEND_MS);
       }, { passive: true });
+
+      document.addEventListener("touchmove", function (event) {
+        if (
+          !event ||
+          !event.cancelable ||
+          typeof window === "undefined" ||
+          !window.visualViewport
+        ) {
+          return;
+        }
+
+        const distance = getTwoTouchDistance(event.touches);
+        if (!distance) {
+          pinchGestureStartDistance = 0;
+          return;
+        }
+
+        if (!pinchGestureStartDistance) {
+          pinchGestureStartDistance = distance;
+          return;
+        }
+
+        const tryingToZoomOut = distance < pinchGestureStartDistance - 1;
+        if (!isViewportZoomedIn() && tryingToZoomOut) {
+          event.preventDefault();
+          return;
+        }
+
+        pinchGestureStartDistance = distance;
+      }, { passive: false });
 
       form.addEventListener("touchmove", function (event) {
         if (
@@ -515,11 +558,13 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
           suspendMobileFocusAssist(MOBILE_FOCUS_ASSIST_SCROLL_COOLDOWN_MS);
         }
         touchGestureStartPoint = null;
+        pinchGestureStartDistance = 0;
       }, { passive: true });
 
       form.addEventListener("touchcancel", function () {
         suspendMobileFocusAssist(MOBILE_FOCUS_ASSIST_SCROLL_COOLDOWN_MS);
         touchGestureStartPoint = null;
+        pinchGestureStartDistance = 0;
       }, { passive: true });
 
       window.addEventListener("scroll", function () {
