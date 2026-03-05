@@ -333,10 +333,28 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       return "";
     }
 
+    function applyPlatformClass() {
+      try {
+        const root = document.documentElement;
+        if (!root || !root.classList) return;
+
+        const ua = String(navigator.userAgent || "").toLowerCase();
+        const maxTouchPoints = Number(navigator.maxTouchPoints || 0);
+        const isAndroid = /android/.test(ua);
+        const isIOS =
+          /iphone|ipad|ipod/.test(ua) ||
+          (/macintosh/.test(ua) && maxTouchPoints > 1);
+
+        root.classList.toggle("platform-ios", isIOS);
+        root.classList.toggle("platform-android", isAndroid && !isIOS);
+      } catch (err) {}
+    }
+
     function ensureMobileLayoutClass() {
       try {
         const root = document.documentElement;
         if (!root) return;
+        applyPlatformClass();
         const ua = navigator.userAgent || "";
         const touch = "ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0;
         const screenWidth = window.screen && window.screen.width ? window.screen.width : 9999;
