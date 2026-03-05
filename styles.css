@@ -675,6 +675,11 @@ body {
 /* ==========================================================================
    6) PAGE 1: POLICY PAGE
    ========================================================================== */
+#policyPage {
+  /* Prevent tiny transform/shadow overflows from creating horizontal scroll. */
+  overflow-x: hidden;
+}
+
 #policyPage .policy-decision {
   margin-top: 14px;
 }
@@ -759,7 +764,7 @@ body {
 }
 
 .policy-choice input:checked + .policy-choice-body {
-  transform: translateY(-1px) scale(1.01);
+  transform: translateY(-1px);
 }
 
 #policyAgreementYes:checked + .policy-choice-body {
@@ -792,10 +797,10 @@ body {
     transform: translateY(0) scale(0.985);
   }
   60% {
-    transform: translateY(-1px) scale(1.015);
+    transform: translateY(-1px) scale(1.008);
   }
   100% {
-    transform: translateY(-1px) scale(1.01);
+    transform: translateY(-1px) scale(1);
   }
 }
 
@@ -1897,17 +1902,25 @@ label,
     grid-template-columns: 1fr;
     row-gap: 6px;
     padding-inline: 14px;
+    max-width: 100%;
+    overflow-x: clip;
   }
 
   .page-title {
     grid-column: 1;
     grid-row: 1;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .page-counter {
     grid-column: 1;
     grid-row: 2;
     text-align: left;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .progress {
@@ -2177,6 +2190,10 @@ label,
     animation: none;
   }
 
+  #policyPage {
+    overflow-x: clip;
+  }
+
   #modalClose {
     min-width: 0;
     width: min(100%, 230px);
@@ -2236,9 +2253,9 @@ p,
 .mode-choice-copy,
 .pdf-copy,
 label {
-  -webkit-hyphens: auto;
-  -ms-hyphens: auto;
-  hyphens: auto;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
   -webkit-font-smoothing: antialiased;
   text-wrap: pretty;
 }
