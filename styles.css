@@ -156,10 +156,9 @@ body {
 }
 
 .shell {
-  width: 100%;
+   width: min(100% - 2rem, clamp(720px, 60vw, 1200px));
+   margin-inline: auto;
   /* fluid max width: scales from small to large screens */
-  max-width: clamp(720px, 62vw, 1200px);
-  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr;
   gap: 18px;
