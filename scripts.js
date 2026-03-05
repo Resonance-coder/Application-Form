@@ -350,24 +350,6 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       } catch (err) {}
     }
 
-    function ensureMobileLayoutClass() {
-      try {
-        const root = document.documentElement;
-        if (!root) return;
-        applyPlatformClass();
-        const ua = navigator.userAgent || "";
-        const touch = "ontouchstart" in window || (navigator.maxTouchPoints || 0) > 0;
-        const screenWidth = window.screen && window.screen.width ? window.screen.width : 9999;
-        const width = Math.min(window.innerWidth || 9999, screenWidth);
-        const mobileUa = /Android|iPhone|iPad|iPod|Mobile|Opera Mini|IEMobile/i.test(ua);
-        if (touch && (width <= 1024 || mobileUa)) {
-          root.classList.add("force-mobile");
-        } else {
-          root.classList.remove("force-mobile");
-        }
-      } catch (err) {}
-    }
-
     function enableTouchPinchZoomAssist() {
       if (!isTouchLikeDevice() || !document || typeof document.addEventListener !== "function") {
         return;
@@ -1397,7 +1379,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       }
 
       if (mode === "online") {
-        onlineModeNote.style.display = "block";
+        onlineModeNote.style.display = "none";
         pdfCard.style.display = "none";
         setPdfUploadEnabled(false);
         setPdfUploadStatus("");
@@ -3572,7 +3554,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     populateProvinceOptions(THAI_PROVINCES);
     populateDistrictOptionsForProvince("");
     loadThailandDistrictData();
-    ensureMobileLayoutClass();
+    applyPlatformClass();
     enableTouchPinchZoomAssist();
     startTouchScrollGuard();
     normalizeFormControlBilingualText();
@@ -3580,11 +3562,11 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     markMyanmarTextElements();
     startAutoBilingualFormatting();
     window.addEventListener("resize", function () {
-      ensureMobileLayoutClass();
+      applyPlatformClass();
       syncPolicyZoomInteractionState();
     });
     window.addEventListener("orientationchange", function () {
-      ensureMobileLayoutClass();
+      applyPlatformClass();
       syncPolicyZoomInteractionState();
     });
     if (window.visualViewport && typeof window.visualViewport.addEventListener === "function") {
