@@ -158,12 +158,9 @@ body {
 .shell {
   width: 100%;
   /* fluid max width: scales from small to large screens */
-  max-width: clamp(720px, 62vw, 1200px);
+ width: 100%;
+  max-width: 820px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
-  align-items: start;
 }
 
 .panel {
