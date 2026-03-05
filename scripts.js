@@ -4,7 +4,7 @@ const FRONTEND_CONFIG_GAS_URL =
   typeof window.__FORM_CONFIG__.gasUrl !== "undefined"
     ? String(window.__FORM_CONFIG__.gasUrl || "").trim()
     : "";
-const FALLBACK_GAS_URL = "";
+const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddpsEl--w7voYus_ge47_WdXfBNj-Gd-asMcPiCjSbKlSCGHTouMdchK/exec";
     const TEMPLATE_WEB_APP_URL =
       typeof window !== "undefined" && window.__WEB_APP_URL__
         ? String(window.__WEB_APP_URL__).trim()
@@ -23,7 +23,7 @@ const FALLBACK_GAS_URL = "";
     const AUTO_NEXT_AFTER_ELIGIBLE = true;
     // When true, eligible users automatically move to the next page.
     const ENABLE_ERROR_CHECK_MODE = false;
-    const ENABLE_MOBILE_FIELD_AUTO_ADVANCE = true;
+    const ENABLE_MOBILE_FIELD_AUTO_ADVANCE = false;
 
     const ELIGIBILITY_RULES = {
       minAge: 17.5,
@@ -1285,7 +1285,7 @@ const FALLBACK_GAS_URL = "";
       if (!applicantName) {
         if (showError) {
           setPdfUploadStatus(
-            "Please enter applicant name before uploading.\n(ဖိုင်တင်မည့်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
+            "Please enter applicant name before uploading.\n(ဖိုင်မတင်မီ လျှောက်ထားသူအမည်ကို ဖြည့်ပါ။)",
             true
           );
         }
@@ -1295,7 +1295,7 @@ const FALLBACK_GAS_URL = "";
       if (!file) {
         if (showError) {
           setPdfUploadStatus(
-            "Please choose a completed PDF file to upload.\n(ဖြည့်ပြီး PDF ဖိုင်ကို ရွေးချယ်ပါ။)",
+            "Please choose a completed PDF file to upload.\n(အချက်အလက်ဖြည့်သွင်းထားသော PDF ဖိုင်ကို ရွေးချယ်ပါ။)",
             true
           );
         }
@@ -1305,7 +1305,7 @@ const FALLBACK_GAS_URL = "";
       if (!isPdfLikeFile(file)) {
         if (showError) {
           setPdfUploadStatus(
-            "Only PDF files are supported.\n(PDF ဖိုင်သာ တင်နိုင်ပါသည်။)",
+            "Only PDF files are supported.\n(PDF ဖိုင်တစ်မျိုးတည်းသာ တင်နိုင်သည်။)",
             true
           );
         }
@@ -1420,9 +1420,9 @@ const FALLBACK_GAS_URL = "";
       setPdfUploadEnabled(false);
       const originalBtnText = pdfUploadSubmitBtn ? pdfUploadSubmitBtn.textContent : "";
       if (pdfUploadSubmitBtn) {
-        pdfUploadSubmitBtn.textContent = "Uploading... / (တင်နေသည်...)";
+        pdfUploadSubmitBtn.textContent = "Uploading... / (တင်သွင်းနေသည်...)";
       }
-      setPdfUploadStatus("Uploading completed PDF file... / (ဖြည့်ပြီး PDF ဖိုင်ကို တင်နေပါသည်...)", false);
+      setPdfUploadStatus("Uploading completed PDF file... / (အချက်အလက်ဖြည့်ပြီး PDF ဖိုင်ကို တင်နေပါသည်...)", false);
 
       try {
         const fileBase64 = await readFileAsBase64(selectedFile);
@@ -1469,7 +1469,7 @@ const FALLBACK_GAS_URL = "";
         pdfUploadInProgress = false;
         setPdfUploadEnabled(getSelectedApplicationMode() === "pdf");
         if (pdfUploadSubmitBtn) {
-          pdfUploadSubmitBtn.textContent = originalBtnText || "Upload Filled PDF / (ဖြည့်ပြီး PDF တင်ရန်)";
+          pdfUploadSubmitBtn.textContent = originalBtnText || "Upload Filled PDF / (အချက်အလက်ဖြည့်ပြီး PDF တင်ရန်)";
         }
       }
     }
@@ -2049,7 +2049,7 @@ const FALLBACK_GAS_URL = "";
 
     function renderPendingEligibility() {
       eligibilityResult.classList.remove("ok", "bad");
-      eligibilityResultTitle.textContent = "Eligibility status: Pending\n(အရည်အချင်း စစ်ဆေးမှု: စောင့်ဆိုင်းဆဲ)";
+      eligibilityResultTitle.textContent = "Eligibility status: Pending\n(အချက်အလက် စစ်ဆေးမှု: စောင့်ဆိုင်းဆဲ)";
       eligibilityResultCopy.textContent = "Complete all eligibility fields to continue.\n(အချက်အလက်အားလုံးဖြည့်ပြီး နောက်စာမျက်နှာသို့ ဆက်သွားပါ။)";
       eligibilityStatusInput.value = "Pending";
       eligibilityReasonsInput.value = "";
