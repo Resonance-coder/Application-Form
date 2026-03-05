@@ -4,14 +4,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @font-face {
   font-family: "Myanmar Ethic";
-  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Ethic-api@main/Myanmar%20Ethnic%20v1.01.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/gh/youthconnect-lin/Myanmar-Ethic-api@main/Myanmar%20Ethnic%20v1.01.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
 }
 @font-face {
   font-family: "Myanmar Thuriya";
-  src: url("https://cdn.jsdelivr.net/gh/Resonance-coder/Myanmar-Thuriya-Api@main/MyanmarThuriya_add_latin_volt.ttf") format("truetype");
+  src: url("https://cdn.jsdelivr.net/gh/youthconnect-lin/Myanmar-Thuriya-Api@main/MyanmarThuriya_add_latin_volt.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
