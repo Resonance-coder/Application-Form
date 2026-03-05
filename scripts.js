@@ -51,7 +51,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     const AUTO_NEXT_AFTER_ELIGIBLE = true;
     // When true, eligible users automatically move to the next page.
     const ENABLE_ERROR_CHECK_MODE = false;
-    const ENABLE_MOBILE_FIELD_AUTO_ADVANCE = false;
+    const ENABLE_MOBILE_FIELD_AUTO_ADVANCE = true;
 
     const ELIGIBILITY_RULES = {
       minAge: 17.5,
@@ -1760,12 +1760,11 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     function focusFieldForMobileAdvance(field) {
       if (!field) return;
-      if (field.tagName === "SELECT") {
-        openSelectPicker(field);
-        return;
-      }
       if (typeof field.focus === "function") {
         field.focus();
+      }
+      if (field.tagName === "SELECT") {
+        return;
       }
       if (field.tagName === "INPUT" && typeof field.setSelectionRange === "function") {
         const value = String(field.value || "");
@@ -1839,12 +1838,52 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       autoAdvanceToNextField(field);
     }
 
-    function handleProvinceSelection() {
+    function isChangeAutoAdvanceInput(field) {
+      if (!field || !isUserField(field)) return false;
+      if (field.tagName !== "INPUT") return false;
+
+      const type = String(field.type || "").toLowerCase();
+      if (
+        type === "checkbox" ||
+        type === "radio" ||
+        type === "hidden" ||
+        type === "file" ||
+        type === "button" ||
+        type === "submit" ||
+        type === "reset" ||
+        type === "tel" ||
+        type === "email"
+      ) {
+        return false;
+      }
+      if (field.readOnly) return false;
+
+      const value = String(field.value || "").trim();
+      if (!value) return false;
+      return field.checkValidity();
+    }
+
+    function handleProvinceSelection(event) {
+      const previousProvince = lastProvinceSelection;
       const selectedProvince = String(provinceInput.value || "");
       lastProvinceSelection = selectedProvince;
 
       populateDistrictOptionsForProvince(selectedProvince);
       updateActionVisibility();
+
+      if (!shouldUseMobileAutoAdvance()) {
+        return;
+      }
+      if (!selectedProvince || selectedProvince === previousProvince) {
+        return;
+      }
+      const target = event && event.target ? event.target : null;
+      if (target && target !== provinceInput) {
+        return;
+      }
+      window.setTimeout(function () {
+        focusFieldForMobileAdvance(districtInput);
+      }, 0);
     }
 
     async function loadThailandDistrictData() {
@@ -3131,19 +3170,28 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     form.addEventListener("change", function (event) {
       const field = event.target;
-      if (!isUserField(field) || field.tagName !== "SELECT") {
-        return;
-      }
-      if (!field.value) {
-        return;
-      }
-      if (triggerNextButtonFromTerminalSelect(field)) {
+      if (!isUserField(field)) {
         return;
       }
       if (!shouldUseMobileAutoAdvance()) {
         return;
       }
-      if (field === provinceInput) {
+
+      if (field.tagName === "SELECT") {
+        if (!field.value) {
+          return;
+        }
+        if (triggerNextButtonFromTerminalSelect(field)) {
+          return;
+        }
+        if (field === provinceInput) {
+          return;
+        }
+        autoAdvanceToNextField(field);
+        return;
+      }
+
+      if (!isChangeAutoAdvanceInput(field)) {
         return;
       }
       autoAdvanceToNextField(field);
