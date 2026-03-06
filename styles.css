@@ -39,30 +39,46 @@
   --my-title-pad-top-mobile: 0.1em;
   --my-title-pad-bottom-mobile: 0.14em;
   /* ======================================================================
-     LANGUAGE FONT MAP (LABELLED PARTS)
+     BASE LANGUAGE FONTS
      ====================================================================== */
-  /* Part A: English body text */
+  /* English body text */
   --font-en-body: "Inter", "Segoe UI", Arial, sans-serif;
-  /* Part B: English heading/title text */
+  /* English heading/title text */
   --font-en-title: "Inter", "Segoe UI", Arial, sans-serif;
-  /* Part C: Burmese generic text (.my / .my-line / :lang(my)) */
-  --font-my-body: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
-  /* Part D: Burmese text inside cards/sections */
+  /* Myanmar generic text (.my / .my-line / :lang(my)) */
+  --font-my-body: "Myanmar Ethic", "Myanmar Thuriya", sans-serif;
+  /* Myanmar text inside cards/sections */
   --font-my-card: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
-  /* Part E: Burmese text inside headings/titles */
+  /* Myanmar text inside headings/titles */
   --font-my-title: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
-  /* Part F: Burmese fallback for mixed EN/MM text without .my wrappers */
-  --font-my-fallback: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
+  /* Myanmar fallback for mixed EN/MM text without .my wrappers */
+  --font-my-fallback:  "Myanmar Ethic", "Myanmar Thuriya",sans-serif;
 
-  /* Policy page part labels (manual override points) */
+  /* ======================================================================
+     ROLE FONT MAP (EDIT THESE FIRST FOR FUTURE CHANGES)
+     ====================================================================== */
+  --font-role-main-title: var(--font-en-title), var(--font-my-title);
+  --font-role-title: var(--font-en-title), var(--font-my-title);
+  --font-role-subtitle: var(--font-en-body), var(--font-my-body);
+  --font-role-body: var(--font-en-body), var(--font-my-fallback);
+  --font-role-label: var(--font-en-body), var(--font-my-body);
+  --font-role-card-label: var(--font-en-body), var(--font-my-card);
+  --font-role-button: var(--font-en-title), var(--font-my-title);
+  --font-role-control: var(--font-en-body), var(--font-my-body);
+  --font-role-caption: var(--font-en-body), var(--font-my-body);
+  --font-role-policy-title: var(--font-en-title), var(--font-my-title);
+  --font-role-review-label: var(--font-en-body), var(--font-my-title);
+  --font-role-review-value: var(--font-en-body), var(--font-my-body);
+
+  /* Policy page manual override points */
   --font-my-policy-terms: var(--font-my-card);
   --font-my-policy-data-processing: var(--font-my-card);
 
   /* Backward-compatible aliases used by existing selectors */
-  --font-latin: var(--font-en-body), var(--font-my-fallback);
+  --font-latin: var(--font-role-body);
   --font-myanmar: var(--font-my-body);
   --font-myanmar-card: var(--font-my-card);
-  --font-title: var(--font-en-title), var(--font-my-title);
+  --font-title: var(--font-role-title);
   --font-title-my: var(--font-my-title);
 }
 
@@ -118,7 +134,7 @@ iframe {
 
 body {
   margin: 0;
-  font-family: var(--font-latin);
+  font-family: var(--font-role-body);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   line-height: 1.55;
@@ -195,6 +211,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--font-role-caption);
   border: 1px solid #b6dfd9;
   border-radius: 999px;
   padding: 5px 11px;
@@ -207,12 +224,14 @@ body {
 
 .title {
   margin: 0;
+  font-family: var(--font-role-main-title);
   line-height: 1.25;
   font-size: 24px;
 }
 
 .subtitle {
   margin: 8px 0 0;
+  font-family: var(--font-role-subtitle);
   font-size: 18px;
   line-height: 1.5;
   color: #334155;
@@ -270,7 +289,55 @@ body {
   font-family: var(--font-my-title) !important;
 }
 
-.title,
+/* Optional utility labels for role-based font control */
+.font-role-main-title {
+  font-family: var(--font-role-main-title) !important;
+}
+
+.font-role-title {
+  font-family: var(--font-role-title) !important;
+}
+
+.font-role-subtitle {
+  font-family: var(--font-role-subtitle) !important;
+}
+
+.font-role-body {
+  font-family: var(--font-role-body) !important;
+}
+
+.font-role-label {
+  font-family: var(--font-role-label) !important;
+}
+
+.font-role-card-label {
+  font-family: var(--font-role-card-label) !important;
+}
+
+.font-role-button {
+  font-family: var(--font-role-button) !important;
+}
+
+.font-role-control {
+  font-family: var(--font-role-control) !important;
+}
+
+.font-role-caption {
+  font-family: var(--font-role-caption) !important;
+}
+
+.font-role-policy-title {
+  font-family: var(--font-role-policy-title) !important;
+}
+
+.font-role-review-label {
+  font-family: var(--font-role-review-label) !important;
+}
+
+.font-role-review-value {
+  font-family: var(--font-role-review-value) !important;
+}
+
 .page-title,
 .section-title,
 .subsection-title,
@@ -282,7 +349,7 @@ body {
 .mode-choice-head,
 .eligibility-result .result-title,
 .success-card h3 {
-  font-family: var(--font-title);
+  font-family: var(--font-role-title);
 }
 
 .title .my,
@@ -516,6 +583,7 @@ body {
 
 .page-counter {
   margin: 0;
+  font-family: var(--font-role-caption);
   font-size: 14px;
   color: #334155;
   font-weight: 700;
@@ -670,6 +738,7 @@ body {
 
 .policy-question {
   margin: 0 0 12px;
+  font-family: var(--font-role-policy-title);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.5;
@@ -710,6 +779,7 @@ body {
 }
 
 .policy-choice-title {
+  font-family: var(--font-role-policy-title);
   font-size: 14px;
   font-weight: 800;
   line-height: 1.4;
@@ -1205,6 +1275,7 @@ body {
 
 label {
   display: block;
+  font-family: var(--font-role-label);
   font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
   color: #1f2937;
   margin-bottom: 8px;
@@ -1222,7 +1293,7 @@ textarea {
   border-radius: 8px;
   padding: 15px 14px;
   min-height: 56px;
-  font-family: inherit;
+  font-family: var(--font-role-control);
   font-size: clamp(16px, 1rem + 0.2vw, 18px);
   line-height: 1.65;
   color: #0f172a;
@@ -1285,6 +1356,7 @@ textarea {
 
 .field-help {
   margin: 6px 0 0;
+  font-family: var(--font-role-caption);
   font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
   color: #64748b;
   line-height: 1.4;
@@ -1307,7 +1379,7 @@ textarea {
   border: 1px solid #d8e3f1;
   border-radius: 10px;
   background: var(--card-bg-soft);
-  font-family: var(--font-en-body), "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
+  font-family: var(--font-role-card-label);
   font-weight: 600;
   font-size: 12px;
   line-height: 1.6;
@@ -1370,6 +1442,7 @@ textarea {
 }
 
 .review-label {
+  font-family: var(--font-role-review-label);
   font-size: clamp(14px, 0.9rem + 0.2vw, 17px);
   color: #334155;
   font-weight: 700;
@@ -1377,6 +1450,7 @@ textarea {
 }
 
 .review-value {
+  font-family: var(--font-role-review-value);
   font-size: 13px;
   color: #0f172a;
   line-height: 1.62;
@@ -1390,6 +1464,7 @@ textarea {
   border-radius: 0;
   background: transparent;
   padding: 8px 0;
+  font-family: var(--font-role-label);
   font-size: 15px;
   font-weight: 700;
   color: #0f172a;
@@ -1430,6 +1505,7 @@ textarea {
    ========================================================================== */
 .note {
   margin: 12px 0 0;
+  font-family: var(--font-role-body);
   font-size: 17px;
   color: var(--muted);
   line-height: 1.55;
@@ -1437,6 +1513,7 @@ textarea {
 
 .error {
   margin: 10px 0 0;
+  font-family: var(--font-role-caption);
   font-size: 13px;
   color: var(--bad);
   min-height: 1.2em;
@@ -1482,7 +1559,7 @@ textarea {
   cursor: pointer;
   border-radius: 10px;
   padding: 11px 14px;
-  font-family: inherit;
+  font-family: var(--font-role-button);
   font-size: clamp(15px, 1rem + 0.3vw, 18px);
   font-weight: 800;
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, background 0.2s ease, border-color 0.2s ease;
