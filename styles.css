@@ -50,7 +50,7 @@
   /* Part D: Burmese text inside cards/sections */
   --font-my-card: "Myanmar Ethic", "Myanmar Thuriya", sans-serif;
   /* Part E: Burmese text inside headings/titles */
-  --font-my-title: "Myanmar Ethic", "Myanmar Thuriya", sans-serif;
+  --font-my-title: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
   /* Part F: Burmese fallback for mixed EN/MM text without .my wrappers */
   --font-my-fallback: "Myanmar Ethic", "Myanmar Thuriya", sans-serif;
 
@@ -62,7 +62,7 @@
   --font-latin: var(--font-en-body), var(--font-my-fallback);
   --font-myanmar: var(--font-my-body);
   --font-myanmar-card: var(--font-my-card);
-  --font-title: var(--font-en-title), var(--font-my-fallback);
+  --font-title: var(--font-en-title), var(--font-my-title);
   --font-title-my: var(--font-my-title);
 }
 
