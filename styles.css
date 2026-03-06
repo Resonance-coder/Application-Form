@@ -46,7 +46,7 @@
   /* English heading/title text */
   --font-en-title: "Inter", "Segoe UI", Arial, sans-serif;
   /* Myanmar generic text (.my / .my-line / :lang(my)) */
-  --font-my-body: "Myanmar Ethic", "Myanmar Thuriya", sans-serif;
+  --font-my-body: "Myanmar Thuriya","Myanmar Ethic",  sans-serif;
   /* Myanmar text inside cards/sections */
   --font-my-card: "Myanmar Thuriya", "Myanmar Ethic", sans-serif;
   /* Myanmar text inside headings/titles */
