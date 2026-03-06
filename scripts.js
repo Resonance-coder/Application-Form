@@ -159,8 +159,45 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     const emergencyPhone2Input = document.getElementById("emergencyPhone2");
     const emergencyOwner2Input = document.getElementById("emergencyOwner2");
     const emergencyRelation2Input = document.getElementById("emergencyRelation2");
+    const PAGE_FIELD_SELECTOR = "input, select, textarea";
+    const actionsWrap = form ? form.querySelector(".actions") : null;
+    const formErrorWrap = form ? form.querySelector("#formError") : null;
+    const pageInsertBeforeNode = actionsWrap || formErrorWrap || null;
+    const pageFieldCache = pages.map(function (page) {
+      return Array.from(page.querySelectorAll(PAGE_FIELD_SELECTOR));
+    });
+    const allFormFields = form ? Array.from(form.querySelectorAll(PAGE_FIELD_SELECTOR)) : [];
+    const fieldStateKeyByElement = new WeakMap();
+    const radioGroupFieldsByName = new Map();
+    const detachedPagesStore = document.createDocumentFragment();
+    const phoneValidationFields = new Set(
+      [
+        phoneCountryCodeInput,
+        phoneInput,
+        emergencyCountryCode1Input,
+        emergencyPhone1Input,
+        emergencyCountryCode2Input,
+        emergencyPhone2Input,
+        emergencyOwner2Input,
+        emergencyRelation2Input
+      ].filter(function (element) {
+        return !!element;
+      })
+    );
+    const autoResizeTextareaFields = new Set(
+      [previousCoursesInput]
+        .concat(additionalPageTextareas)
+        .filter(function (element) {
+          return !!element;
+        })
+    );
+    const virtualFormState = Object.create(null);
 
     let currentPage = 0;
+    let activePageElement = null;
+    let lazyRouterReady = false;
+    let thaiDistrictDataLoadPromise = null;
+    let thaiDistrictDataLoaded = false;
     let provinceDistrictMap = {};
     let pdfDownloadLogged = false;
     let pdfUploadInProgress = false;
@@ -304,6 +341,272 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     };
 
     provinceDistrictMap = Object.assign({}, FALLBACK_PROVINCE_DISTRICTS);
+
+    function debounce(callback, delayMs) {
+      let timeoutId = 0;
+      return function () {
+        const args = arguments;
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
+        timeoutId = window.setTimeout(function () {
+          timeoutId = 0;
+          callback.apply(null, args);
+        }, delayMs);
+      };
+    }
+
+    const scheduleActionVisibilityUpdate = (function () {
+      let frameToken = 0;
+      const raf =
+        typeof window !== "undefined" && typeof window.requestAnimationFrame === "function"
+          ? window.requestAnimationFrame.bind(window)
+          : function (callback) {
+              return window.setTimeout(callback, 16);
+            };
+      return function () {
+        if (frameToken) {
+          return;
+        }
+        frameToken = raf(function () {
+          frameToken = 0;
+          updateActionVisibility();
+        });
+      };
+    })();
+
+    const debouncedFieldValidation = debounce(function (field) {
+      if (!isUserField(field)) {
+        return;
+      }
+      const touched = field.dataset && field.dataset.touched === "1";
+      setFieldErrorState(field, touched);
+    }, 110);
+
+    function getPageFields(pageIndex) {
+      return pageFieldCache[pageIndex] || [];
+    }
+
+    function getFieldStateKey(field) {
+      return fieldStateKeyByElement.get(field) || "";
+    }
+
+    function rememberFieldState(field) {
+      if (!field) {
+        return;
+      }
+      const stateKey = getFieldStateKey(field);
+      if (!stateKey) {
+        return;
+      }
+      const fieldTag = String(field.tagName || "").toUpperCase();
+      const fieldType = String(field.type || "").toLowerCase();
+
+      if (fieldTag === "SELECT" && field.multiple) {
+        virtualFormState[stateKey] = Array.from(field.selectedOptions || []).map(function (option) {
+          return String(option.value || "");
+        });
+        return;
+      }
+
+      if (fieldType === "checkbox" || fieldType === "radio") {
+        virtualFormState[stateKey] = !!field.checked;
+        return;
+      }
+
+      if (fieldType === "file") {
+        const file = field.files && field.files.length ? field.files[0] : null;
+        virtualFormState[stateKey] = file || null;
+        return;
+      }
+
+      virtualFormState[stateKey] = field.value;
+    }
+
+    function rememberPageState(pageIndex) {
+      getPageFields(pageIndex).forEach(function (field) {
+        rememberFieldState(field);
+      });
+    }
+
+    function rememberAllFormState() {
+      allFormFields.forEach(function (field) {
+        rememberFieldState(field);
+      });
+    }
+
+    function restoreFieldState(field) {
+      if (!field) {
+        return;
+      }
+      const stateKey = getFieldStateKey(field);
+      if (!stateKey || !Object.prototype.hasOwnProperty.call(virtualFormState, stateKey)) {
+        return;
+      }
+      const fieldTag = String(field.tagName || "").toUpperCase();
+      const fieldType = String(field.type || "").toLowerCase();
+      const savedValue = virtualFormState[stateKey];
+
+      if (fieldTag === "SELECT" && field.multiple) {
+        const selectedValues = Array.isArray(savedValue) ? new Set(savedValue.map(String)) : new Set();
+        Array.from(field.options || []).forEach(function (option) {
+          option.selected = selectedValues.has(String(option.value || ""));
+        });
+        return;
+      }
+
+      if (fieldType === "checkbox" || fieldType === "radio") {
+        field.checked = !!savedValue;
+        return;
+      }
+
+      if (fieldType === "file") {
+        return;
+      }
+
+      field.value = savedValue == null ? "" : String(savedValue);
+    }
+
+    function restorePageState(pageIndex) {
+      getPageFields(pageIndex).forEach(function (field) {
+        restoreFieldState(field);
+        syncFilledStateForField(field);
+      });
+    }
+
+    function initializeLazyPageRouter() {
+      if (lazyRouterReady || !form || !pages.length) {
+        return;
+      }
+
+      rememberAllFormState();
+
+      pages.forEach(function (page) {
+        page.classList.remove("active");
+        if (page.parentNode === form) {
+          form.removeChild(page);
+        } else if (page.parentNode) {
+          page.parentNode.removeChild(page);
+        }
+        detachedPagesStore.appendChild(page);
+      });
+
+      activePageElement = null;
+      lazyRouterReady = true;
+    }
+
+    function mountPage(pageIndex, previousPageIndex) {
+      const nextPage = pages[pageIndex];
+      if (!nextPage || !form) {
+        return;
+      }
+
+      if (!lazyRouterReady) {
+        initializeLazyPageRouter();
+      }
+
+      if (typeof previousPageIndex === "number" && previousPageIndex >= 0) {
+        rememberPageState(previousPageIndex);
+      }
+
+      if (activePageElement && activePageElement !== nextPage) {
+        activePageElement.classList.remove("active");
+        if (activePageElement.parentNode === form) {
+          form.removeChild(activePageElement);
+        } else if (activePageElement.parentNode) {
+          activePageElement.parentNode.removeChild(activePageElement);
+        }
+        detachedPagesStore.appendChild(activePageElement);
+      }
+
+      if (nextPage.parentNode && nextPage.parentNode !== form) {
+        nextPage.parentNode.removeChild(nextPage);
+      }
+
+      restorePageState(pageIndex);
+      nextPage.classList.add("active");
+
+      if (nextPage.parentNode !== form) {
+        form.insertBefore(nextPage, pageInsertBeforeNode);
+      }
+
+      activePageElement = nextPage;
+    }
+
+    function resetAllFormFieldsToDefault() {
+      allFormFields.forEach(function (field) {
+        if (!field) {
+          return;
+        }
+        const fieldTag = String(field.tagName || "").toUpperCase();
+        const fieldType = String(field.type || "").toLowerCase();
+
+        if (fieldType === "checkbox" || fieldType === "radio") {
+          field.checked = !!field.defaultChecked;
+        } else if (fieldTag === "SELECT") {
+          const options = Array.from(field.options || []);
+          if (field.multiple) {
+            options.forEach(function (option) {
+              option.selected = !!option.defaultSelected;
+            });
+          } else {
+            let defaultIndex = options.findIndex(function (option) {
+              return !!option.defaultSelected;
+            });
+            if (defaultIndex < 0) {
+              defaultIndex = options.length ? 0 : -1;
+            }
+            field.selectedIndex = defaultIndex;
+          }
+        } else if (fieldType === "file") {
+          try {
+            field.value = "";
+          } catch (_) {}
+        } else {
+          field.value = field.defaultValue == null ? "" : String(field.defaultValue);
+        }
+
+        rememberFieldState(field);
+        syncFilledStateForField(field);
+        if (field.dataset) {
+          field.dataset.touched = "0";
+          field.dataset.autoAdvancedValue = "";
+        }
+      });
+    }
+
+    function ensureThailandDistrictDataLoaded() {
+      if (thaiDistrictDataLoaded) {
+        return Promise.resolve();
+      }
+      if (thaiDistrictDataLoadPromise) {
+        return thaiDistrictDataLoadPromise;
+      }
+      thaiDistrictDataLoadPromise = loadThailandDistrictData().finally(function () {
+        thaiDistrictDataLoaded = true;
+        thaiDistrictDataLoadPromise = null;
+      });
+      return thaiDistrictDataLoadPromise;
+    }
+
+    allFormFields.forEach(function (field, index) {
+      if (!field) {
+        return;
+      }
+      const stableFieldKey =
+        String(field.id || field.name || field.tagName || "field") + "::" + String(index);
+      fieldStateKeyByElement.set(field, stableFieldKey);
+
+      if (String(field.type || "").toLowerCase() === "radio") {
+        const groupName = String(field.name || "");
+        if (groupName) {
+          if (!radioGroupFieldsByName.has(groupName)) {
+            radioGroupFieldsByName.set(groupName, []);
+          }
+          radioGroupFieldsByName.get(groupName).push(field);
+        }
+      }
+    });
 
     function toMyanmarNumber(value) {
       const digits = ["၀", "၁", "၂", "၃", "၄", "၅", "၆", "၇", "၈", "၉"];
@@ -1102,8 +1405,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     }
 
     function syncFilledStateAll() {
-      const fields = form.querySelectorAll("input, select, textarea");
-      fields.forEach(function (field) {
+      allFormFields.forEach(function (field) {
         syncFilledStateForField(field);
       });
     }
@@ -1176,8 +1478,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     }
 
     function clearAllFieldErrors() {
-      const fields = form.querySelectorAll("input, select, textarea");
-      fields.forEach(function (field) {
+      allFormFields.forEach(function (field) {
         if (!isUserField(field)) return;
         field.classList.remove("is-invalid");
         field.removeAttribute("aria-invalid");
@@ -1196,10 +1497,16 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       }
 
       if (field.id) {
-        const label = form.querySelector('label[for="' + field.id + '"]');
-        if (label) {
-          return cleanLabelText(label.textContent);
-        }
+        const escapedId = typeof CSS !== "undefined" && typeof CSS.escape === "function"
+          ? CSS.escape(field.id)
+          : String(field.id).replace(/"/g, '\\"');
+        const nearestPage = field.closest(".form-page");
+        const localLabel = nearestPage
+          ? nearestPage.querySelector('label[for="' + escapedId + '"]')
+          : null;
+        const formLabel = form.querySelector('label[for="' + escapedId + '"]');
+        const label = localLabel || formLabel;
+        if (label) return cleanLabelText(label.textContent);
       }
 
       const parentLabel = field.closest("label");
@@ -1265,8 +1572,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
         if (!field.name) {
           return field.checked ? String(field.value || "").trim() : "Not provided / (မဖြည့်ထားပါ)";
         }
-        const safeName = String(field.name).replace(/"/g, '\\"');
-        const groupRadios = form.querySelectorAll('input[type="radio"][name="' + safeName + '"]');
+        const groupRadios = radioGroupFieldsByName.get(String(field.name || "")) || [];
         let checkedRadio = null;
         for (const option of groupRadios) {
           if (option && option.checked) {
@@ -1316,7 +1622,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
         const page = pages[pageIndex];
         const seenRadioGroups = new Set();
-        const fields = Array.from(page.querySelectorAll("input, select, textarea")).filter(function (field) {
+        const fields = getPageFields(pageIndex).filter(function (field) {
           if (field.disabled) return false;
           if (field.type === "hidden") return false;
           if (field.type === "button" || field.type === "submit" || field.type === "reset") return false;
@@ -1916,9 +2222,8 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     }
 
     function getCurrentPageInteractiveFields() {
-      const page = pages[currentPage];
-      if (!page) return [];
-      return Array.from(page.querySelectorAll("input, select, textarea")).filter(function (field) {
+      if (!pages[currentPage]) return [];
+      return getPageFields(currentPage).filter(function (field) {
         if (!isUserField(field)) return false;
         if (field.readOnly) return false;
         if (field.type === "checkbox" || field.type === "radio") return false;
@@ -2066,7 +2371,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       lastProvinceSelection = selectedProvince;
 
       populateDistrictOptionsForProvince(selectedProvince);
-      updateActionVisibility();
+      scheduleActionVisibilityUpdate();
 
       if (!shouldUseMobileAutoAdvance()) {
         return;
@@ -2387,7 +2692,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
         validatePhoneSet();
       }
 
-      const fields = page.querySelectorAll("input, select, textarea");
+      const fields = getPageFields(pageIndex);
       for (const field of fields) {
         if (field.type === "hidden" || field.disabled) {
           continue;
@@ -2504,6 +2809,12 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     }
 
     function setClosedUiShellState() {
+      if (activePageElement && activePageElement.parentNode === form) {
+        activePageElement.classList.remove("active");
+        form.removeChild(activePageElement);
+        detachedPagesStore.appendChild(activePageElement);
+      }
+      activePageElement = null;
       pages.forEach(function (page) {
         page.classList.remove("active");
       });
@@ -2653,7 +2964,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
         validatePhoneSet();
       }
 
-      const fields = page.querySelectorAll("input, select, textarea");
+      const fields = getPageFields(pageIndex);
       let firstInvalidField = null;
 
       for (const field of fields) {
@@ -2690,10 +3001,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     function setPage(index) {
       const previousPage = currentPage;
       currentPage = Math.max(0, Math.min(index, pages.length - 1));
-
-      pages.forEach(function (page, pageIndex) {
-        page.classList.toggle("active", pageIndex === currentPage);
-      });
+      mountPage(currentPage, previousPage);
 
       syncPolicyZoomInteractionState();
 
@@ -2733,7 +3041,19 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       if (previousPage !== currentPage) {
         scrollToPageTop();
       }
+      if (currentPage === ELIGIBILITY_PAGE_INDEX) {
+        void ensureThailandDistrictDataLoaded();
+      }
       // leave policy routing to the explicit policy choice handlers
+    }
+
+    function showPage(stepNumber) {
+      const numericStep = Number(stepNumber);
+      if (!Number.isFinite(numericStep)) {
+        return;
+      }
+      const targetIndex = Math.max(0, Math.min(Math.trunc(numericStep) - 1, pages.length - 1));
+      setPage(targetIndex);
     }
 
     function padTwoDigits(value) {
@@ -2782,8 +3102,41 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     function collectFormData() {
       const data = {};
-      new FormData(form).forEach(function (value, key) {
-        data[key] = typeof value === "string" ? value.trim() : value;
+      rememberAllFormState();
+      allFormFields.forEach(function (field) {
+        if (!field || field.disabled || !field.name) {
+          return;
+        }
+
+        const fieldType = String(field.type || "").toLowerCase();
+        if (fieldType === "button" || fieldType === "submit" || fieldType === "reset") {
+          return;
+        }
+        if ((fieldType === "checkbox" || fieldType === "radio") && !field.checked) {
+          return;
+        }
+
+        if (fieldType === "file") {
+          if (field.files && field.files.length) {
+            data[field.name] = field.files[0];
+          }
+          return;
+        }
+
+        if (field.tagName === "SELECT" && field.multiple) {
+          const selectedOptions = Array.from(field.selectedOptions || []);
+          if (!selectedOptions.length) {
+            return;
+          }
+          data[field.name] = String(selectedOptions[selectedOptions.length - 1].value || "").trim();
+          return;
+        }
+
+        const stateKey = getFieldStateKey(field);
+        const fieldValue = stateKey && Object.prototype.hasOwnProperty.call(virtualFormState, stateKey)
+          ? virtualFormState[stateKey]
+          : field.value;
+        data[field.name] = typeof fieldValue === "string" ? fieldValue.trim() : fieldValue;
       });
       data.submittedAt = new Date().toISOString();
       return data;
@@ -2968,6 +3321,8 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     function resetApplicationStateToStart() {
       form.reset();
+      resetAllFormFieldsToDefault();
+      rememberAllFormState();
       pdfDownloadLogged = false;
       notEligibleSubmissionLogged = false;
       policyDeclinedSubmissionLogged = false;
@@ -3107,103 +3462,81 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     if (schoolInput) {
       schoolInput.addEventListener("change", function () {
         toggleSchoolOther();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (qualificationInput) {
       qualificationInput.addEventListener("change", function () {
         toggleQualificationOther();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (incomeModeInput) {
       incomeModeInput.addEventListener("change", function () {
         toggleIncomeFields();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (workTypeInput) {
       workTypeInput.addEventListener("change", function () {
         toggleIncomeFields();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (incomeCurrencyInput) {
       incomeCurrencyInput.addEventListener("change", function () {
         toggleIncomeFields();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (incomeAmountInput) {
       incomeAmountInput.addEventListener("input", function () {
         formatIncomeAmount();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
-
-    if (previousCoursesInput) {
-      previousCoursesInput.addEventListener("input", function () {
-        autoResizeTextarea(previousCoursesInput);
-      });
-    }
-
-    additionalPageTextareas.forEach(function (textarea) {
-      textarea.addEventListener("input", function () {
-        autoResizeTextarea(textarea);
-      });
-    });
 
     if (computerLevelInput) {
       computerLevelInput.addEventListener("change", function () {
         toggleComputerSkillGroups();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
     if (incompleteHistoryInput) {
       incompleteHistoryInput.addEventListener("change", function () {
         toggleIncompleteReason();
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     }
 
-    [
-      phoneCountryCodeInput,
-      phoneInput,
-      emergencyCountryCode1Input,
-      emergencyPhone1Input,
-      emergencyCountryCode2Input,
-      emergencyPhone2Input,
-      emergencyOwner2Input,
-      emergencyRelation2Input
-    ].forEach(function (element) {
-      if (!element) return;
-      element.addEventListener("input", function () {
-        validatePhoneSet();
-        updateActionVisibility();
-      });
-      element.addEventListener("change", function () {
-        validatePhoneSet();
-        updateActionVisibility();
-      });
+    form.addEventListener("click", function (event) {
+      const card = event.target && typeof event.target.closest === "function"
+        ? event.target.closest(".mode-choice-card")
+        : null;
+      if (!card) {
+        return;
+      }
+      handleApplicationModeSelection(String(card.dataset.mode || ""));
     });
 
-    applicationModeCards.forEach(function (card) {
-      card.addEventListener("click", function () {
-        handleApplicationModeSelection(String(card.dataset.mode || ""));
-      });
-      card.addEventListener("keydown", function (event) {
-        if (event.key !== "Enter" && event.key !== " ") {
-          return;
-        }
-        event.preventDefault();
-        handleApplicationModeSelection(String(card.dataset.mode || ""));
-      });
+    form.addEventListener("keydown", function (event) {
+      const card = event.target && typeof event.target.closest === "function"
+        ? event.target.closest(".mode-choice-card")
+        : null;
+      if (!card) {
+        return;
+      }
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+      event.preventDefault();
+      handleApplicationModeSelection(String(card.dataset.mode || ""));
     });
 
     pdfDownloadLink.addEventListener("click", function (event) {
@@ -3260,22 +3593,6 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       });
     });
 
-    if (pdfApplicantNameInput) {
-      pdfApplicantNameInput.addEventListener("input", function () {
-        if (pdfUploadStatus && pdfUploadStatus.classList.contains("is-error")) {
-          validatePdfUploadInput(false);
-        }
-      });
-    }
-
-    if (pdfApplicantPhoneInput) {
-      pdfApplicantPhoneInput.addEventListener("input", function () {
-        if (pdfUploadStatus && pdfUploadStatus.classList.contains("is-error")) {
-          validatePdfUploadInput(false);
-        }
-      });
-    }
-
     if (pdfFilledFileInput) {
       pdfFilledFileInput.addEventListener("change", function () {
         const file = validatePdfUploadInput(false);
@@ -3296,20 +3613,21 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     }
 
     [dobInput, provinceInput, districtInput, highestGradeInput, attendanceInput, commitmentInput].forEach(function (element) {
+      if (!element) return;
       element.addEventListener("change", function () {
         if (!dobInput.value || !provinceInput.value || !districtInput.value || !highestGradeInput.value || !attendanceInput.value || !commitmentInput.value) {
           renderPendingEligibility();
-          updateActionVisibility();
+          scheduleActionVisibilityUpdate();
           return;
         }
-        updateActionVisibility();
+        scheduleActionVisibilityUpdate();
       });
     });
 
     reviewConfirmInput.addEventListener("change", function () {
       reviewConfirmInput.dataset.touched = "1";
       setFieldErrorState(reviewConfirmInput, true);
-      updateActionVisibility();
+      scheduleActionVisibilityUpdate();
     });
 
     function handlePolicyChoiceSelect() {
@@ -3319,21 +3637,46 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
       routeFromPolicyChoice();
     }
 
-    policyAgreementChoices.forEach(function (choice) {
-      choice.addEventListener("change", handlePolicyChoiceSelect);
-      choice.addEventListener("click", handlePolicyChoiceSelect);
+    form.addEventListener("change", function (event) {
+      const target = event.target;
+      if (target && target.name === "policyAgreement") {
+        handlePolicyChoiceSelect();
+      }
+    });
+    form.addEventListener("click", function (event) {
+      const target = event.target;
+      const policyInput = target && typeof target.closest === "function"
+        ? target.closest('input[name="policyAgreement"]')
+        : null;
+      if (policyInput) {
+        handlePolicyChoiceSelect();
+      }
     });
 
     form.addEventListener("input", function (event) {
-      if (isUserField(event.target)) {
-        syncFilledStateForField(event.target);
-        const touched = event.target.dataset.touched === "1";
-        setFieldErrorState(event.target, touched);
+      const field = event.target;
+      if (isUserField(field)) {
+        syncFilledStateForField(field);
+        rememberFieldState(field);
+        debouncedFieldValidation(field);
       }
-      if (event.target !== reviewConfirmInput && reviewConfirmInput.checked) {
+      if (autoResizeTextareaFields.has(field)) {
+        autoResizeTextarea(field);
+      }
+      if (phoneValidationFields.has(field)) {
+        validatePhoneSet();
+      }
+      if (
+        (field === pdfApplicantNameInput || field === pdfApplicantPhoneInput) &&
+        pdfUploadStatus &&
+        pdfUploadStatus.classList.contains("is-error")
+      ) {
+        validatePdfUploadInput(false);
+      }
+      if (field !== reviewConfirmInput && reviewConfirmInput.checked) {
         reviewConfirmInput.checked = false;
       }
-      updateActionVisibility();
+      scheduleActionVisibilityUpdate();
     });
 
     form.addEventListener("focusin", function (event) {
@@ -3350,21 +3693,27 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     form.addEventListener("blur", function (event) {
       if (isUserField(event.target)) {
         syncFilledStateForField(event.target);
+        rememberFieldState(event.target);
         event.target.dataset.touched = "1";
         setFieldErrorState(event.target, true);
       }
     }, true);
 
     form.addEventListener("change", function (event) {
-      if (isUserField(event.target)) {
-        syncFilledStateForField(event.target);
-        event.target.dataset.touched = "1";
-        setFieldErrorState(event.target, true);
+      const field = event.target;
+      if (isUserField(field)) {
+        syncFilledStateForField(field);
+        rememberFieldState(field);
+        field.dataset.touched = "1";
+        setFieldErrorState(field, true);
       }
-      if (event.target !== reviewConfirmInput && reviewConfirmInput.checked) {
+      if (phoneValidationFields.has(field)) {
+        validatePhoneSet();
+      }
+      if (field !== reviewConfirmInput && reviewConfirmInput.checked) {
         reviewConfirmInput.checked = false;
       }
-      updateActionVisibility();
+      scheduleActionVisibilityUpdate();
     });
 
     form.addEventListener("change", function (event) {
@@ -3402,18 +3751,19 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     form.addEventListener("reset", function () {
       window.setTimeout(function () {
-        const focusedFields = form.querySelectorAll(".is-mobile-focused");
-        focusedFields.forEach(function (element) {
+        allFormFields.forEach(function (element) {
+          if (!element) return;
           element.classList.remove("is-mobile-focused");
-        });
-        const autoAdvancedFields = form.querySelectorAll("[data-auto-advanced-value]");
-        autoAdvancedFields.forEach(function (element) {
-          element.dataset.autoAdvancedValue = "";
+          if (element.dataset) {
+            element.dataset.autoAdvancedValue = "";
+          }
+          rememberFieldState(element);
         });
         autoResizeTextarea(previousCoursesInput);
         additionalPageTextareas.forEach(function (textarea) {
           autoResizeTextarea(textarea);
         });
+        scheduleActionVisibilityUpdate();
       }, 0);
     });
 
@@ -3592,7 +3942,6 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
 
     populateProvinceOptions(THAI_PROVINCES);
     populateDistrictOptionsForProvince("");
-    loadThailandDistrictData();
     ensureMobileLayoutClass();
     enableTouchPinchZoomAssist();
     startTouchScrollGuard();
@@ -3624,6 +3973,7 @@ const FALLBACK_GAS_URL = "https://script.google.com/macros/s/AKfycbyrqFTPNwHQddp
     additionalPageTextareas.forEach(function (textarea) {
       autoResizeTextarea(textarea);
     });
+    initializeLazyPageRouter();
     if (isSubmissionClosedNow()) {
       setClosedUiShellState();
       trackSubmissionClosedLandingOnce();
